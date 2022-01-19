@@ -5,13 +5,13 @@ import subprocess
 from time import sleep
 import glob
 from shutil import move, rmtree, copy
-from functions.get_modpack_info import get_server_modpack_url, get_modpack_minecraft_version
-from functions.get_forge_or_fabric_version import get_forge_or_fabric_version_from_manifest
-from functions.download_file import download
-from functions.ptero_api_func import update_new_forge
-from functions.unzip_modpack import unzip
-from functions.serverstarter_func import change_installpath
-from functions.ptero_api_func import get_server_id
+from get_modpack_info import get_server_modpack_url, get_modpack_minecraft_version
+from get_forge_or_fabric_version import get_forge_or_fabric_version_from_manifest
+from download_file import download
+from ptero_api_func import update_new_forge
+from unzip_modpack import unzip
+from serverstarter_func import change_installpath
+from ptero_api_func import get_server_id
 import psutil
 import pathlib
 import platform
