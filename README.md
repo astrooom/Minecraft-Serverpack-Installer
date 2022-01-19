@@ -13,7 +13,7 @@ This is a Python script made to automatically download and install Minecraft mod
 After the installer is done, the modpack will be fully installed in a separate folder (named after the modpack itself) and ready to be started.
 
 ## Compatibility
-OS: ```Windows```, ```Linux```
+OS: ```Windows```, ```Linux```  
 The script works with both Forge and Fabric modpacks.
 
 ## Usage
