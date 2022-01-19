@@ -1,26 +1,32 @@
 # Curseforge Serverpack Downloader and Installer
 
 This is a script made to automatically download and install Minecraft modpacks from 
-<a href="https://curseforge.com">Curseforge</a> as intended by the modpack author. Serverpacks provided for modpacks by their authors come in very different kinds, with many different installers. This is an attempt to unify the installation of all serverpacks (for both Forge and Fabric) as the modpack author intended them to be. [Here's the kinds of serverpack installers the script works with](#installer-types).
+<a href="https://curseforge.com">Curseforge</a> as intended by the modpack author. Serverpacks provided for modpacks by their authors come in very different kinds, with many different installers. This is an attempt to unify the installation of all serverpacks (for both Forge and Fabric) as the modpack author intended them to be. [Here's the kinds of serverpack installers the script works with](#installer-types). It's extensively tested and should work with all modpacks on Curseforge.
 
-The script will:
+#### The script will:
 1. Download the modpacks author-provided serverpack from the Curseforge Project ID (works with either the latest modpack version or a specified one - see below)
 
 2. Run any provided installers through a unification attempt that come with the serverpack if needed.
 
 3. Remove garbage files.
 
-## How to use
-### 1. Download and unarchive the repository into any directory
+After the installer is done, the modpack will be fully installed in a separate folder (named after the modpack itself) and ready to be started.
 
-### 2. Run "run.py" from your terminal with specified [arguments](#required-arguments) like:
+## How to use
+### 1. Download and unarchive the repository into any directory you want
+
+### 2. Install requirements.txt using ```pip install -r requirements.txt```
+
+### 3. Run "run.py" from your terminal with specified [arguments](#arguments) like:
 python run.py ```mode``` ```modpack_id``` ```modpack_version``` ```clean_startup_script```
 
+## Done!
 
-## Required arguments:
+
+## Arguments:
 #### mode
 Available modes: ```normal``` and ```pterodactyl```
-Normal is intended to use locally on your PC. Pterodactyl is intended to use in conjunction with a pterodactyl egg install script. If you do not know what this means, use ```normal```.
+Normal is intended to use locally on your PC. Pterodactyl is intended to use in conjunction with a pterodactyl egg install script. [More details on this](#pterodactyl-mode). If you do not know what this means, use ```normal```.
 #### modpack_id
 This is the modpacks project ID found on <a href="https://www.curseforge.com/minecraft/modpacks">the Curseforge website</a> in the top right "About Project" section of your desired modpack.
 #### modpack_version
@@ -30,3 +36,11 @@ Use ```True``` (must be capitalized) to clean provided "run.bat" and "run.sh" / 
 
 ## Installer types
 There is currently no standardization in how serverpacks are uploaded on Curseforge. Some serverpacks include **all** required files to run the server by default, others require Forge or Fabric to be installed separately with only the mods and libraries folders included, and some for mods to be downloaded using the [ServerStarter script by BloodyMods](https://github.com/BloodyMods/ServerStarter) or the somewhat standardized manifest.json file. This script is compatible with all these  types of installers by identifying and running them as tasks separately if needed. The advantage of using this script over other scripts is that it downlaods and installs the serverpack as intended by the modpack author, keeping certain files that they have included which, were the mods installed in any other way, would not have been included. The modpack author may, for example, have made modifications to the server.properties file or mod config files for the player to have a better experience. These would not have been carried over using another way of installing the modpack.
+
+## Pterodactyl mode
+The script can also run in ```pterodactyl``` mode. Pterodactyl mode is intended to be used in conjunction with popular Game Server Panel software [Pterodactyl Panel](https://github.com/pterodactyl/panel) in an egg install script (in bash). Currently, this mode will move the files directly to the root folder of the installation script instead of the modpack installing in it's own subfolder.
+
+## Requirements
+```Python 3.7+``` (Might work on earlier versions of python as well - not tested.)
+```python3-pip```
+```Java (11 or later)``` (for Forge/Fabric installers)
