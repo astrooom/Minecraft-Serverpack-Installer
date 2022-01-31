@@ -28,6 +28,7 @@ if mode == "pterodactyl":
     panel_url = sys.argv[6]
     application_api_key = sys.argv[7]
 
+interpreter_path = sys.executable
 minecraft_version = str(get_modpack_minecraft_version(modpack_id))
 
 print("Installer running in", mode, "mode.")
@@ -294,13 +295,14 @@ if (forge_installer or serverstarter_installer or fabric_installer) and not rena
             print("Found old server.jar file. Deleting.")
             os.remove(sever_jar_path)
 
-# manifest_installer = False
-# if not forge_installer and not serverstarter_installer:
-#     for name in glob.glob(this_dir + "/" + folder_name + "/" + "manifest.json"):
-#         if name:
-#             manifest_installer = True
-#             print("Running manifest installer...")
-#             os.system(f"python {this_dir}/curse_downloader.py --manifest {this_dir}/{folder_name}/manifest.json --nogui")
+# If there is no forge, fabric or serverstarter installer, but a manifest.json file. Download the mods manually using a separate script.
+manifest_installer = False
+if not forge_installer and not serverstarter_installer:
+    for name in glob.glob(this_dir + "/" + folder_name + "/" + "manifest.json"):
+        if name:
+            manifest_installer = True
+            print("Running manifest installer...")
+            os.system(f'''java -jar "{this_dir}/ModpackDownloader-cli-0.7.1.jar" -manifest "{this_dir}/{folder_name}/manifest.json" -folder "{this_dir}/{folder_name}/mods"''')
 
 #If there was no included forge/fabric or serverstarter installer, as well as no manifest.json provided in the serverpack, get the manifest file and download the correct forge/fabric version and install it.
 forge_or_fabric_file_found = False
@@ -446,6 +448,7 @@ for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "server.
         print("server.properties file already found. Skipping download.")
 if not has_properties:
     try:
+        os.chdir(f"{this_dir}/{folder_name}")
         print("No server.properties file was found. Downloading...")
         download('https://raw.githubusercontent.com/parkervcp/eggs/master/minecraft/java/server.properties')
     except:
@@ -458,6 +461,7 @@ for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "eula.tx
         print("eula.txt file already found. Skipping download.")
 if not has_eula:
     try:
+        os.chdir(f"{this_dir}/{folder_name}")
         print("No eula.txt file was found. Downloading...")
         download("https://raw.githubusercontent.com/kaboomserver/server/master/eula.txt")
     except:
