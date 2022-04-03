@@ -8,7 +8,7 @@ from shutil import move, rmtree, copy
 from get_modpack_info import get_server_modpack_url, get_modpack_minecraft_version
 from get_forge_or_fabric_version import get_forge_or_fabric_version_from_manifest
 from download_file import download
-from ptero_api_func import update_new_forge
+from ptero_api_func import update_startup
 from unzip_modpack import unzip
 from serverstarter_func import change_installpath
 from ptero_api_func import get_server_id
@@ -555,14 +555,9 @@ if mode == "pterodactyl":
                     elif operating_system == "Windows": # Requires enabling developer mode in windows 10.
                         os.symlink(link_from, link_to)
 
-    if new_forge_ver:
-        print("Changing startup script to work with new Forge startup")
-        current_server_id = get_server_id(server_uuid, panel_url, application_api_key)
-        update_new_forge(current_server_id, minecraft_version, panel_url, application_api_key)
-
-
-
-
+    print("Changing startup script and java version")
+    current_server_id = get_server_id(server_uuid, panel_url, application_api_key)
+    update_startup(current_server_id, minecraft_version, panel_url, application_api_key)
 
 print("Finished downloading and installing modpack", modpack_name + "! :)")
 

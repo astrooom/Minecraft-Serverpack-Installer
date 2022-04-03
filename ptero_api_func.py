@@ -27,7 +27,7 @@ def get_server_id(uuid, panel_url, application_api_key):
 
 
 # Updates the server in pterodactyl to the new forge versions by changing the startup command and the docker image.
-def update_new_forge(server_id, minecraft_version, panel_url, application_api_key):
+def update_startup(server_id, minecraft_version, panel_url, application_api_key):
     # Get previous egg info required
     egg_info_url = f'{panel_url}/api/application/servers/{server_id}'
     headers = {
@@ -67,5 +67,3 @@ def update_new_forge(server_id, minecraft_version, panel_url, application_api_ke
 
     response = requests.request(
         'PATCH', update_startup_url, data=json.dumps(payload), headers=headers)
-
-
