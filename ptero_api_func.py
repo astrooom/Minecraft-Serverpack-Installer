@@ -51,7 +51,9 @@ def update_new_forge(server_id, minecraft_version, panel_url, application_api_ke
     if "1.18" in minecraft_version:
         egg_image = 'ghcr.io/pterodactyl/yolks:java_17'
     elif "1.17" in minecraft_version:
-        egg_image = 'ghcr.io/pterodactyl/yolks:java_17'
+        egg_image = 'ghcr.io/pterodactyl/yolks:java_16'
+    elif "1.12" in minecraft_version:
+        egg_image = 'ghcr.io/pterodactyl/yolks:java_8'
     else:
         egg_image = 'ghcr.io/pterodactyl/yolks:java_8'
 
@@ -65,3 +67,5 @@ def update_new_forge(server_id, minecraft_version, panel_url, application_api_ke
 
     response = requests.request(
         'PATCH', update_startup_url, data=json.dumps(payload), headers=headers)
+
+
