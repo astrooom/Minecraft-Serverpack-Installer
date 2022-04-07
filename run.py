@@ -24,9 +24,10 @@ modpack_version = sys.argv[3] # Modpack version to guess. Feature isn't perfect 
 clean_startup_script = sys.argv[4] # If to clean (remove) the provided startup scripts (.sh for linux and .bat for Windows) when installing the server modpack. Set to "True" or "False".
 
 if mode == "pterodactyl":
-    server_uuid = sys.argv[5] # Used to get the UUID of the currently installing server.
-    panel_url = sys.argv[6]
-    application_api_key = sys.argv[7]
+    modify_startup = sys.argv[5] # Whether to modify the server startup or not. Requires panel url and application api key to be input.
+    server_uuid = sys.argv[6] # Used to get the UUID of the currently installing server.
+    panel_url = sys.argv[7]
+    application_api_key = sys.argv[8]
 
 interpreter_path = sys.executable
 minecraft_version = str(get_modpack_minecraft_version(modpack_id))
@@ -555,6 +556,7 @@ if mode == "pterodactyl":
                     elif operating_system == "Windows": # Requires enabling developer mode in windows 10.
                         os.symlink(link_from, link_to)
 
+if modify_startup == True:
     print("Changing startup script and java version")
     current_server_id = get_server_id(server_uuid, panel_url, application_api_key)
     update_startup(current_server_id, minecraft_version, panel_url, application_api_key)
