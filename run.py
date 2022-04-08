@@ -25,7 +25,7 @@ clean_startup_script = sys.argv[4] # If to clean (remove) the provided startup s
 
 if mode == "pterodactyl":
     modify_startup = sys.argv[5] # Whether to modify the server startup or not. Requires panel url and application api key to be input.
-    if modify_startup:
+    if modify_startup == True:
         server_uuid = sys.argv[6] # Used to get the UUID of the currently installing server.
         panel_url = sys.argv[7]
         application_api_key = sys.argv[8]
