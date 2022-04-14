@@ -304,7 +304,7 @@ if not forge_installer and not serverstarter_installer:
         if name:
             manifest_installer = True
             print("Running manifest installer...")
-            os.system(f'''java -jar "{this_dir}/ModpackDownloader-cli-0.7.1.jar" -manifest "{this_dir}/{folder_name}/manifest.json" -folder "{this_dir}/{folder_name}/mods"''')
+            os.system(f'''java -jar "{this_dir}/ModpackDownloader-cli-0.7.2.jar" -manifest "{this_dir}/{folder_name}/manifest.json" -folder "{this_dir}/{folder_name}/mods"''')
 
 #If there was no included forge/fabric or serverstarter installer, as well as no manifest.json provided in the serverpack, get the manifest file and download the correct forge/fabric version and install it.
 forge_or_fabric_file_found = False
