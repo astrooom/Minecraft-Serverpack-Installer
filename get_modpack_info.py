@@ -40,7 +40,7 @@ def get_server_modpack_url(modpack_id, modpack_version):
             release_type = version["releaseType"]
 
             if str(version_id) == str(modpack_version):
-                version_id_downloadurl = requests.get(f'https://addons-ecs.forgesvc.net/api/v2/addon/{modpack_id}/file/{server_pack_id}/download-url', timeout=10, headers=HEADERS).text
+                version_id_downloadurl = requests.get(f'https://addons-ecs.forgesvc.net/api/v2/addon/{modpack_id}/file/{version_id}/download-url', timeout=10, headers=HEADERS).text
                 urls = {"SpecifiedVersion": version_id_downloadurl, "LatestReleaseServerPack": "", "LatestBetaServerpack": "", "LatestAlphaServerpack": "", "LatestReleaseNonServerpack": ""}
                 return_list = [modpack_name.replace("  ", " "), urls, normal_downloadurl]
                 return return_list
