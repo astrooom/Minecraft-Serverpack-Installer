@@ -1,7 +1,7 @@
 # Minecraft Serverpack Downloader and Installer
 
 This is a Python script made to automatically download and install Minecraft modpacks from 
-<a href="https://curseforge.com">Curseforge</a> as intended by the modpack author. Serverpacks provided for modpacks by their authors come in very different kinds, with many different installers. This is an attempt to unify the installation of all serverpacks (for both Forge and Fabric) as the modpack author intended them to be. [Here's the kinds of serverpack installers the script works with](#installer-types). The script is extensively tested and should work with all modpacks on Curseforge.
+Curseforge, Technicpack (or a direct download link) as intended by the modpack author. Serverpacks provided for modpacks by their authors come in very different kinds, with many different installers. This is an attempt to unify the installation of all serverpacks (for both Forge and Fabric) as the modpack author intended them to be. [Here's the kinds of serverpack installers the script works with](#installer-types). The script is extensively tested and should work with all modpacks on Curseforge.
 
 #### The script will:
 1. Download the modpacks serverpack (or non-serverpack) from the Curseforge Project ID, Technic modpack slug, or a direct download link (url). See details below.
