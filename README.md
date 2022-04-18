@@ -27,17 +27,25 @@ python run.py ```-provider PROVIDER``` ```-modpack-id MODPACK-ID``` ```[--modpac
 ### Done!
 
 ## Arguments
-#### mode
-Available modes: ```normal``` and ```pterodactyl```
-Normal is intended to use locally on your PC. Pterodactyl is intended to use in conjunction with a pterodactyl egg install script ([More details on this](#pterodactyl-mode)). If you do not know what this means, use ```normal```.
-#### modpack_id
-This is the modpacks project ID found on <a href="https://www.curseforge.com/minecraft/modpacks">the Curseforge website</a> in the top right "About Project" section of your desired modpack.
-#### modpack_version
-Which version of the modpack to install. Specify a version from the modpacks name. For example, <a href="https://www.curseforge.com/minecraft/modpacks/rlcraft">RLCraft</a> names their releases like "v.2.9", "v.2.8.2" etc. (as you can see by going to the "Files" section). Here, you can use "v.2.8.2" to pull that version. 
+#### provider
+Provider sets from where to fetch the modpack. Available modes are ```curse``` for Curseforge, ```technic``` from Technicpack, and ```direct``` for a direct download link (url) to a modpack (can be from any site).
+#### modpack-id
+If provider is set to ```curse``` this should be the modpacks project ID found on <a href-"https://www.curseforge.com/minecraft/modpacks"›the Curseforge website‹/a› in the top right "About Project" section of your desired modpack.
 
-Use ```latest``` to pull the latest serverpack if exists. In conjunction with Curseforges' release type system, ```latest``` will always to try to pull the latest "recommended" serverpack from Curse. If no "recommended" version exists, it will pull the latest "beta" serverpack. If no "beta" version exists it will pull the latest "alpha" serverpack. If the modpack has no provided serverpack at all it will pull the latest non-serverpack in the same order.
-#### clean_startup_script
-Use ```True``` (must be capitalized) to clean provided "run.bat" and "run.sh" / "start.bat" and "start.sh" (or any other name they may have) server startup script files after installing the server. Use ```False``` to keep them.
+If provider is set to ```technic```, this should be the modpack slug found on <a href="https://www.technicpack.net/modpacks/official"> the Technicpack website</a>. In the url of each modpack. Fir example, the url for the Attack of the B-Team modpack is https://www.technicpack.net/modpack/attack-of-the-bteam.552556. The slug is the last part of this url minus the dot and the numbers (i.e attack-of-the-bteam).
+
+If provider is set to ```direct```, this should be a direct download link (url), from where to fetch the modpack.
+#### modpack-version (optional)
+Which version of the modpack to install. Specify a version from the modpacks name. For example, <a href="https://www.curseforge.com/minecraft/modpacks/rlcraft">RLCraft</a> names their releases like "v.2.9", "v.2.8.2" etc. (as you can see by going to the "Files" section). Here, you can use "v.2.8.2" to pull that version. You can also use an exact version ID from Curseforge. For Technic, versions are labeled as "builds" instead of versions. This option is not available if provider is set to ```direct```. If left unspecified, the installer will fetch the latest recommended version of the modpack.
+
+In conjunction with Curseforges' release type system, if no "recommended" version exists, it will pull the latest "beta" serverpack. If no "beta" version exists it will pull the latest "alpha" serverpack. If the modpack has no provided serverpack at all it will pull the latest non-serverpack in the same order. For technic, all modpacks have a recommended version.
+#### clean-scripts (optional)
+Set to clean (remove) the provided startup scripts (.sh for linux and .bat for Windows) when installing the modpack.
+#### update (optional)
+Set to remove the /mods, /.fabric and /libraries folders before installing the modpack. This should be set if updating a modpack and not set if it's a first-time install.
+
+#### pterodactyl (optional)
+Pterodactyl is intended to use in conjunction with a pterodactyl egg install script ([More details on this](#pterodactyl-mode)).
 
 ## Installer types
 There is currently no standardization in how serverpacks are uploaded on Curseforge. 
@@ -49,8 +57,10 @@ This script is compatible with all different types of installers by identifying 
 
 The modpack author may, for example, have made modifications to the server.properties file or any mod config file. These modifications would not be carried over using another way of installing the modpack.
 
+For technic, contrary to curse, modpacks are standardized to include all files required to start the server.
+
 ## Pterodactyl Mode
-The script can also run in ```pterodactyl``` mode. Pterodactyl mode is intended to be used in conjunction with popular Game Server Panel software [Pterodactyl Panel](https://github.com/pterodactyl/panel) in an egg install script (in bash). Currently, this mode will move the files directly to the root folder of the installation script instead of the modpack installing in it's own subfolder.
+The script can also run in the optional ```--pterodactyl``` mode. Pterodactyl mode is intended to be used in conjunction with popular Game Server Panel software [Pterodactyl Panel](https://github.com/pterodactyl/panel) in an egg install script (in bash). Currently, this mode will move the files directly to the root folder of the installation script instead of the modpack installing in it's own subfolder.
 
 ## Requirements
 ```Python 3.7+``` (Might work on earlier versions of python as well - not tested.)  
