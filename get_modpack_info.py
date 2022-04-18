@@ -175,14 +175,10 @@ def get_server_modpack_url(provider, modpack_id, modpack_version):
                 version_id_downloadurl = url_link + "/" + url_filename_noversion + "_v" + modpack_version + url_extension
 
                 #Check if url is valid
-                response_test = requests.head(url, timeout=10, headers=HEADERS)
+                response_test = requests.head(version_id_downloadurl, timeout=10, headers=HEADERS)
                 status_code = response_test.status_code
                 if not (400 <= int(status_code) <= 500):
-                    print("Constructed version URL is invalid. Defaulting to recommended instead.")
-
-                    
-
-
+                    print("Constructed version URL", version_id_downloadurl, "is valid.")
                     urls = {"SpecifiedVersion": version_id_downloadurl, "LatestReleaseServerPack": "", "LatestBetaServerpack": "", "LatestAlphaServerpack": "", "LatestReleaseNonServerpack": ""}
 
                     normal_downloadurl = ""
