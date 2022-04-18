@@ -16,25 +16,57 @@ import psutil
 import pathlib
 import platform
 import sys
-import oschmod
+import argparse
 
-mode = sys.argv[1] # currently only accepts mode "normal", and "pterodactyl" (without quotations). pterodactyl mode will move the files to the root directory of the install script at the end.
-modpack_id = sys.argv[2] # Curseforge modpack ID.
-modpack_version = sys.argv[3] # Modpack version to guess. Feature isn't perfect yet. Put "latest" for latest (without quotations).
-clean_startup_script = sys.argv[4] # If to clean (remove) the provided startup scripts (.sh for linux and .bat for Windows) when installing the server modpack. Set to "True" or "False".
+parser = argparse.ArgumentParser(description="Set options for modpack installer.")
 
-if mode == "pterodactyl":
-    modify_startup = sys.argv[5] # Whether to modify the server startup or not. Requires panel url and application api key to be input.
-    if modify_startup == True:
-        server_uuid = sys.argv[6] # Used to get the UUID of the currently installing server.
-        panel_url = sys.argv[7]
-        application_api_key = sys.argv[8]
+#Required arguments
+parser.add_argument("-provider", type=str, required=True) #Provider modes: "curse", "technic", and "direct".
+parser.add_argument("-modpack-id", type=str, required=True) # if provider is curse, provide curse modpack ID. If technic, provide technic modpack slug. If direct, provide direct download url.
+
+parser.add_argument("--modpack-version", type=str, default=False, action="store") # Version to match. Can be an ID or a version name. Will not work with provider direct.
+parser.add_argument("--pterodactyl", default="normal", action="store_true") #pterodactyl mode will move the files to the root directory at the end.
+parser.add_argument("--clean-scripts", default=False, action="store_true")  # If to clean (remove) the provided startup scripts (.sh for linux and .bat for Windows) when installing the server modpack.
+parser.add_argument("--update", default=False, action="store_true") #If to remove the /mods, /.fabric and /libraries folders before installing the modpack. This should be set if updating a modpack and not set if it's a first-time install.
+
+# If running --pterodactyl, you must provide these args
+parser.add_argument("--modify-startup", default=False, action="store") # Used to get the UUID of the currently installing server.
+parser.add_argument("--server-uuid", default=False, action="store") # Used to get the UUID of the currently installing server.
+parser.add_argument("--panel-url", default=False, action="store") # URL of Pterodactyl panel.
+parser.add_argument("--application-api-key", default=False, action="store") # Application API Key for accessing Pterodactyl Panel application API endpoints.
+args = parser.parse_args()
+
+provider = args.provider
+modpack_id = args.modpack_id
+mode = args.pterodactyl
+modpack_version = args.modpack_version
+
+clean_startup_script = args.clean_scripts
+remove_old_files = args.update
+    
+
+modify_startup = args.modify_startup
+server_uuid = args.server_uuid 
+panel_url = args.panel_url
+application_api_key = args.application_api_key
+if modify_startup:
+    if not server_uuid or not panel_url or not application_api_key:
+        print("You are running pterodactyl mode with modify startup but have not provided server uuid, panel url or application api key correctly.")
+        sys.exit()
+
+
+
+
 
 interpreter_path = sys.executable
-minecraft_version = str(get_modpack_minecraft_version(modpack_id))
+if provider == "curse" or provider == "technic":
+    minecraft_version = str(get_modpack_minecraft_version(provider, modpack_id))
+elif provider == "direct":
+    minecraft_version = "unspecified"
 
 print("Installer running in", mode, "mode.")
-print("Received arguments to download modpack with ID", modpack_id, "with version", modpack_version, "using minecraft version", minecraft_version)
+print("Fetching modpack from", provider + ".")
+print("Received arguments to download modpack with ID", modpack_id, "from provider", provider, "with version", modpack_version, "using minecraft version", minecraft_version)
 
 #Checks OS to know which install file to execute (.bat or .sh)
 operating_system = platform.system()
@@ -85,10 +117,14 @@ def kill(proc_pid):
 # Better_Minecraft_Fabric = 452013
 # #FTB_Revelation = 283861 #FTB Serverpack
 
-modpack_info = get_server_modpack_url(modpack_id, modpack_version)
-modpack_name = modpack_info[0]
-modpack_urls = modpack_info[1]
-modpack_normal_downloadurl = modpack_info[2]
+modpack_info = get_server_modpack_url(provider, modpack_id, modpack_version)
+if modpack_info:
+    modpack_name = modpack_info[0]
+    modpack_urls = modpack_info[1]
+    modpack_normal_downloadurl = modpack_info[2]
+else:
+    print("Modpack info not provided. Exiting.")
+    sys.exit()
 
 
 
@@ -119,7 +155,6 @@ sleep(2)
 print("Extracting downloaded modpack archive...")
 folder_name = unzip(filename, modpack_name)
 
-
 modpack_folder = os.listdir(join(this_dir, folder_name))
 
 #Count number of files
@@ -128,7 +163,6 @@ for modpack_file in modpack_folder:
     file_count += 1
 
 #print(filename[:-8].replace("+", " "))
-
 
 #Move subdirectory to main directory if zip file is double-foldered
 existing_subdir = False
@@ -151,12 +185,25 @@ if existing_subdir:
     delete_directory(this_dir + "/" + folder_name + "/" + subfolder_name)
 
 # Deletes existing libraries and user jvm args file (required for forge 1.17+)
-for libraries in glob.glob(glob.escape(this_dir + "/" + folder_name + "/" ) + "libraries"):
-    print("Found and deleting old libraries folder", libraries, ". Deleting")
-    delete_tree_directory(libraries)
-for user_jvm_args in glob.glob(glob.escape(this_dir + "/" + folder_name + "/" ) + "user_jvm_args.txt"):
-    print("Found and deleting old user_jvm_args", user_jvm_args)
-    os.remove(user_jvm_args)
+if remove_old_files == True:
+    print("Deleting old server folders...")
+    for libraries in glob.glob(glob.escape(this_dir + "/" + folder_name + "/" ) + "libraries"):
+        print("Found and deleting old libraries folder", libraries, ". Deleting")
+        delete_tree_directory(libraries)
+    for mods in glob.glob(glob.escape(this_dir + "/" + folder_name + "/" ) + "mods"):
+        print("Found and deleting old mods folder", mods, ". Deleting")
+        delete_tree_directory(mods)
+    for coremods in glob.glob(glob.escape(this_dir + "/" + folder_name + "/" ) + "coremods"):
+        print("Found and deleting old coremods folder", coremods, ". Deleting")
+        delete_tree_directory(coremods)
+    for fabric_folder in glob.glob(glob.escape(this_dir + "/" + folder_name + "/" ) + ".fabric"):
+        print("Found and deleting old .fabric folder", fabric_folder, ". Deleting")
+        delete_tree_directory(fabric_folder)
+    for user_jvm_args in glob.glob(glob.escape(this_dir + "/" + folder_name + "/" ) + "user_jvm_args.txt"):
+        print("Found and deleting old user_jvm_args", user_jvm_args)
+        os.remove(user_jvm_args)
+else:
+    print("Skipping deleting old server folders.")
 
 #Check if forge installer exists in serverpack dir. If does, run it.
 forge_installer = False
@@ -306,22 +353,23 @@ if not forge_installer and not serverstarter_installer:
             print("Running manifest installer...")
             os.system(f'''java -jar "{this_dir}/ModpackDownloader-cli-0.7.2.jar" -manifest "{this_dir}/{folder_name}/manifest.json" -folder "{this_dir}/{folder_name}/mods"''')
 
-#If there was no included forge/fabric or serverstarter installer, as well as no manifest.json provided in the serverpack, get the manifest file and download the correct forge/fabric version and install it.
-forge_or_fabric_file_found = False
+#If there was no included forge/fabric or serverstarter installer, as well as no manifest.json provided in the serverpack, look for existing forge or fabric server jar. If they don't exist, get the manifest file and download the correct forge/fabric version and install it.
 server_jar_found = False
 if not forge_installer and not serverstarter_installer and not fabric_installer:
-    print("Neither a forge installer or a serverstarter installer was found for the downloaded pack. Checking if forge jar already exists...")
+    print("Neither a forge installer or a serverstarter installer was found for the downloaded pack. Checking if forge/fabric jar already exists...")
     for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "*"):
-        if "server.jar" in name:
+        if ".jar" in name.lower() and "minecraft" not in name.lower():
             server_jar_found = True
+            print("Found Server Jar. Renaming it to server.jar if it has other name.")
             sever_jar_path = name
-            print("Found Server Jar.")
+            move(sever_jar_path, (os.path.dirname(sever_jar_path)) + '/server.jar')
+            
 
-    if server_jar_found:
-        print("Found old server.jar.")
-        os.remove(sever_jar_path)
+    # if server_jar_found:
+    #     print("Found old server.jar.")
+    #     os.remove(sever_jar_path)
 
-    if not forge_or_fabric_file_found:
+    if not server_jar_found:
         manifest_file_found = False
         print("No forge or fabric file found. Checking for manifest.json...")
         for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "manifest.json"):
@@ -333,17 +381,18 @@ if not forge_installer and not serverstarter_installer and not fabric_installer:
                 modpack_jar_version = grabbed_manifest_version[1]
 
         if not manifest_file_found:
-            print("No manifest.json was found. Checking for it with normal downloadurl link...")
-            filename = download(modpack_normal_downloadurl)
-            temp_folder = unzip(filename, "manifest_check")
-            for name in glob.glob(glob.escape(this_dir + "/" + temp_folder + "/") + "manifest.json"):
-                if name:
-                    print("Found manifest.json file in normal (non-serverpack) folder. Grabbing forge or fabric version...")
-                    grabbed_manifest_version = get_forge_or_fabric_version_from_manifest(name)
-                    modpack_jar_type = grabbed_manifest_version[0]
-                    modpack_jar_version = grabbed_manifest_version[1]
-                    delete_tree_directory(this_dir + "/" + temp_folder)
-                    print("Deleted temp folder")
+            if modpack_normal_downloadurl:
+                print("No manifest.json was found. Checking for it with normal downloadurl link...")
+                filename = download(modpack_normal_downloadurl)
+                temp_folder = unzip(filename, "manifest_check")
+                for name in glob.glob(glob.escape(this_dir + "/" + temp_folder + "/") + "manifest.json"):
+                    if name:
+                        print("Found manifest.json file in normal (non-serverpack) folder. Grabbing forge or fabric version...")
+                        grabbed_manifest_version = get_forge_or_fabric_version_from_manifest(name)
+                        modpack_jar_type = grabbed_manifest_version[0]
+                        modpack_jar_version = grabbed_manifest_version[1]
+                        delete_tree_directory(this_dir + "/" + temp_folder)
+                        print("Deleted temp folder")
 
         if modpack_jar_type == "forge":
             if "1.12.2-14.23.5" in modpack_jar_version:
@@ -421,17 +470,16 @@ for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "servers
         print("Removing", name)
         os.remove(name)
 
-if clean_startup_script == True: # If set to true, script will delete provided server startup script (.sh for linux and .bat for Windows).
+if clean_startup_script: # If set to true, script will delete provided server startup script (.sh for linux and .bat for Windows).
+    print("Clean startup scripts enabled.")
     for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "*.sh"):
         if name:
-            if "run.sh" not in name:
-                print("Removing", name)
-                os.remove(name)
+            print("Removing", name)
+            os.remove(name)
     for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "*.bat"):
         if name:
-            if "run.bat" not in name:
-                print("Removing", name)
-                os.remove(name)
+            print("Removing", name)
+            os.remove(name)
 # for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "manifest.json"):
 #     if name:
 #         print("Removing", name)
@@ -558,9 +606,12 @@ if mode == "pterodactyl":
                         os.symlink(link_from, link_to)
 
 if modify_startup == True:
-    print("Changing startup script and java version")
-    current_server_id = get_server_id(server_uuid, panel_url, application_api_key)
-    update_startup(current_server_id, minecraft_version, panel_url, application_api_key)
+    if minecraft_version != "unknown":
+        print("Changing startup script and java version")
+        current_server_id = get_server_id(server_uuid, panel_url, application_api_key)
+        update_startup(current_server_id, minecraft_version, panel_url, application_api_key)
+    else:
+        print("Minecraft version is", minecraft_version, "cannot update Pterodactyl startup with this version.")
 
 print("Finished downloading and installing modpack", modpack_name + "! :)")
 
