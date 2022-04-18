@@ -39,6 +39,8 @@ args = parser.parse_args()
 provider = args.provider
 modpack_id = args.modpack_id
 mode = args.pterodactyl
+if mode == True:
+    mode = "pterodactyl"
 modpack_version = args.modpack_version
 
 clean_startup_script = args.clean_scripts
