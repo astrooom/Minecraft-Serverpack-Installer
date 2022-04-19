@@ -3,6 +3,12 @@ import json
 import datetime
 from dateutil import parser
 
+def contains_number(value):
+    if True in [char.isdigit() for char in value]:
+        return True
+    return False
+
+
 #modpack_id = 381671
 
 def get_server_modpack_url(provider, modpack_id, modpack_version):
@@ -223,7 +229,9 @@ def get_modpack_minecraft_version(provider, modpack_id):
 
         try:
             latest_file = response["latestFiles"][0]
-            game_version = latest_file["gameVersion"][0]
+            for ver in latest_file["gameVersion"]:
+                if contains_number(ver):
+                    game_version = ver
             return game_version
         except:
             print("Could not obtain minecraft version for this modpack. Returning False")
