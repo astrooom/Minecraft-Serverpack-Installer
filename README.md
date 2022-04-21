@@ -30,7 +30,7 @@ python run.py ```-provider PROVIDER``` ```-modpack-id MODPACK-ID``` ```[--modpac
 #### provider
 Provider sets from where to fetch the modpack. Available modes are ```curse``` for Curseforge, ```technic``` from Technicpack, and ```direct``` for a direct download link (url) to a modpack (can be from any site).
 #### modpack-id
-If provider is set to ```curse``` this should be the modpacks project ID found on <a href-"https://www.curseforge.com/minecraft/modpacks"›the Curseforge website‹/a› in the top right "About Project" section of your desired modpack.
+If provider is set to ```curse``` this should be the modpacks project ID found on <a href="https://www.curseforge.com/minecraft/modpacks">the Curseforge website</a> in the top right "About Project" section of your desired modpack.
 
 If provider is set to ```technic```, this should be the modpack slug found on <a href="https://www.technicpack.net/modpacks/official"> the Technicpack website</a>. In the url of each modpack. Fir example, the url for the Attack of the B-Team modpack is https://www.technicpack.net/modpack/attack-of-the-bteam.552556. The slug is the last part of this url minus the dot and the numbers (i.e attack-of-the-bteam).
 
