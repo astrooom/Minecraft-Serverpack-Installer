@@ -181,7 +181,7 @@ if provider == "ftb":
 
     if operating_system == "Linux":
         os.system(f"chmod +x {filename}")
-    p = subprocess.Popen(filename, stdin=subprocess.PIPE,
+    p = subprocess.Popen(f"./{filename}", stdin=subprocess.PIPE,
                          stdout=subprocess.PIPE, shell=True)
     p.communicate(input=b"\n")
     try:
