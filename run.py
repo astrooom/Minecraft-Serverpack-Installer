@@ -389,6 +389,7 @@ if provider != "ftb":
         except:
             pass
 
+    #Check if mods.csv file is found. If so, run its install script.
     mods_csv_installer = False
     if not forge_installer and not serverstarter_installer:
         for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "*.csv"):
