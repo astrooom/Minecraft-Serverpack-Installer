@@ -273,7 +273,7 @@ if provider != "ftb":
                 print(
                     "Found outdated and broken version of Forge 1.12.2. Downloading newest.")
                 os.remove(name)
-                twelvetwoforge = "https://maven.minecraftforge.net/net/minecraftforge/forge/1.12.2-14.23.5.2855/forge-1.12.2-14.23.5.2855-installer.jar"
+                twelvetwoforge = "https://maven.minecraftforge.net/net/minecraftforge/forge/1.12.2-14.23.5.2860/forge-1.12.2-14.23.5.2860-installer.jar"
                 print("Changing Directory for downloading forge installer")
                 os.chdir(f"{this_dir}/{folder_name}")
                 forge_installer_dl = download(twelvetwoforge)
