@@ -389,6 +389,35 @@ if provider != "ftb":
         except:
             pass
 
+    mods_csv_installer = False
+    if not forge_installer and not serverstarter_installer:
+        for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "*.csv"):
+            if name:
+                print("Detected mods.csv installer.")
+                mods_csv_installer = True
+                if operating_system == "Windows":
+                    file_ext = "*.bat"
+                    print("Detected Windows Operating System")
+                if operating_system == "Linux":
+                    file_ext = "*.sh"
+                    print("Detected Linux Operating System")
+            for file in glob.glob(this_dir + "/" + folder_name + "/" + f"{file_ext}"):
+                if operating_system == "Linux":
+                    os.system(f"chmod +x {file}")
+                print("Changing Directory for mods.csv installer")
+                os.chdir(f"{this_dir}/{folder_name}")
+                print("Running mods.csv installer. This may take a minute or two...")
+                p = subprocess.Popen(f"{file}", stdin=subprocess.PIPE,
+                                     stdout=subprocess.PIPE, shell=True)
+                p.communicate(input=b"\n")
+                try:
+                    p.wait(timeout=15)
+                except subprocess.TimeoutExpired:
+                    print("Timeout reached for mods.csv installer subprocess. Killing.")
+                    kill(p.pid)
+                print("Removing mods.csv server installer")
+                os.remove(file)
+
     if (forge_installer or serverstarter_installer or fabric_installer) and not renamed_serverjar:
         server_jar_found = False
         for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "*"):
@@ -402,7 +431,7 @@ if provider != "ftb":
 
     # If there is no forge, fabric or serverstarter installer, but a manifest.json file. Download the mods manually using a separate script.
     manifest_installer = False
-    if not forge_installer and not serverstarter_installer:
+    if not forge_installer and not serverstarter_installer and not mods_csv_installer:
         for name in glob.glob(this_dir + "/" + folder_name + "/" + "manifest.json"):
             if name:
                 manifest_installer = True
@@ -412,7 +441,7 @@ if provider != "ftb":
 
     # If there was no included forge/fabric or serverstarter installer, as well as no manifest.json provided in the serverpack, look for existing forge or fabric server jar. If they don't exist, get the manifest file and download the correct forge/fabric version and install it.
     server_jar_found = False
-    if not forge_installer and not serverstarter_installer and not fabric_installer:
+    if not forge_installer and not serverstarter_installer and not fabric_installer and not mods_csv_installer:
         print("Neither a forge installer or a serverstarter installer was found for the downloaded pack. Checking if forge/fabric jar already exists...")
         for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "*"):
             if ".jar" in name.lower() and "minecraft" not in name.lower():
@@ -539,6 +568,15 @@ for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "servers
     if name:
         print("Removing", name)
         os.remove(name)
+for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "*mods.csv"):
+    if name:
+        print("Removing", name)
+        os.remove(name)
+for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "*README*"):
+    if name:
+        print("Removing", name)
+        os.remove(name)
+
 
 # If set to true, script will delete provided server startup script (.sh for linux and .bat for Windows).
 if clean_startup_script:
