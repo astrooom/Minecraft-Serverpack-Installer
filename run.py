@@ -491,7 +491,7 @@ if provider != "ftb":
                 if "1.12.2-14.23.5" in modpack_jar_version:
                     print(
                         "Found outdated and broken version of forge 1.12.2. Downloading latest for 1.12.2 instead.")
-                    forge_installer_url = 'https://maven.minecraftforge.net/net/minecraftforge/forge/1.12.2-14.23.5.2855/forge-1.12.2-14.23.5.2855-installer.jar'
+                    forge_installer_url = 'https://maven.minecraftforge.net/net/minecraftforge/forge/1.12.2-14.23.5.2860/forge-1.12.2-14.23.5.2860-installer.jar'
                 else:
                     forge_installer_url = f'https://files.minecraftforge.net/maven/net/minecraftforge/forge/{modpack_jar_version}/forge-{modpack_jar_version}-installer.jar'
                 os.chdir(f"{this_dir}/{folder_name}")
