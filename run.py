@@ -39,7 +39,7 @@ parser.add_argument("--update", default=False, action="store_true")
 
 # If running --pterodactyl, you must provide these args
 # Used to get the UUID of the currently installing server.
-parser.add_argument("--modify-startup", default=False, action="store")
+parser.add_argument("--modify-startup", default=False, action="store_true")
 # Used to get the UUID of the currently installing server.
 parser.add_argument("--server-uuid", default=False, action="store")
 # URL of Pterodactyl panel.
