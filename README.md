@@ -28,11 +28,13 @@ python run.py ```-provider PROVIDER``` ```-modpack-id MODPACK-ID``` ```[--modpac
 
 ## Arguments
 #### provider
-Provider sets from where to fetch the modpack. Available modes are ```curse``` for Curseforge, ```technic``` from Technicpack, and ```direct``` for a direct download link (url) to a modpack (can be from any site).
+Provider sets from where to fetch the modpack. Available modes are ```curse``` for Curseforge, ```technic``` for Technicpack, ```ftb``` for Feed The Beast and ```direct``` for a direct download link (url) to a modpack (can be from any site).
 #### modpack-id
 If provider is set to ```curse``` this should be the modpacks project ID found on <a href="https://www.curseforge.com/minecraft/modpacks">the Curseforge website</a> in the top right "About Project" section of your desired modpack.
 
-If provider is set to ```technic```, this should be the modpack slug found on <a href="https://www.technicpack.net/modpacks/official"> the Technicpack website</a>. In the url of each modpack. Fir example, the url for the Attack of the B-Team modpack is https://www.technicpack.net/modpack/attack-of-the-bteam.552556. The slug is the last part of this url minus the dot and the numbers (i.e attack-of-the-bteam).
+If provider is set to ```technic```, this should be the modpack slug found for each modpack on <a href="https://www.technicpack.net/modpacks/official"> the Technicpack website</a>. For example, the url for the Attack of the B-Team modpack is https://www.technicpack.net/modpack/attack-of-the-bteam.552556. The slug is the last part of this url minus the dot and the numbers (i.e attack-of-the-bteam).
+
+If provider is set to ```ftb```, this should be the modpack ID found on <a href="https://feed-the-beast.com/modpack"> the Feed The Beast website</a>. In the first part of the url for each modpack there is a numerical ID. For example, The Direwolf20 1.16 modpack's link is https://feed-the-beast.com/modpack/79_ftb_presents_direwolf20_1_16. This modpacks' ID is therefore 79.
 
 If provider is set to ```direct```, this should be a direct download link (url), from where to fetch the modpack.
 #### modpack-version (optional)
