@@ -21,7 +21,7 @@ The script works with both Forge and Fabric modpacks.
 
 ### 2. Install requirements.txt using ```pip install -r requirements.txt```
 
-### 3. Run "run.py" from your terminal with specified [arguments](#arguments) like (option arguments in square brackets):
+### 3. Run "run.py" from your terminal with specified [arguments](#arguments) like ####(optional arguments in square brackets):
 python run.py ```-provider PROVIDER``` ```-modpack-id MODPACK-ID``` ```[--modpack-version MODPACK-VERSION]``` ```[--pterodactyl]``` ```[--clean-scripts]``` ```[--update]```
 
 ### Done!
