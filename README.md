@@ -4,7 +4,7 @@ This is a Python script made to automatically download and install Minecraft mod
 Curseforge, Technicpack, FTB, and a direct download link as the pack was intended by the modpack author. Serverpacks provided for modpacks by their authors come in very different kinds, with many different installers. This is an attempt to unify the installation of all serverpacks (for both Forge and Fabric) as the modpack author intended them to be. [Here's the kinds of serverpack installers the script works with](#installer-types). The script is extensively tested and should work with all modpacks on Curseforge.
 
 #### The script will:
-1. Download the modpacks serverpack (or non-serverpack) from the Curseforge Project ID, Technic modpack slug, or a direct download link (url). See details below.
+1. Download the modpacks serverpack (or non-serverpack) from the Curseforge Project ID, Technic modpack slug, FTB modpack ID, or a direct download link (url). See details below.
 
 2. Run any provided installers through a unification attempt that come with the serverpack if needed.
 
@@ -21,7 +21,7 @@ The script works with both Forge and Fabric modpacks.
 
 ### 2. Install requirements.txt using ```pip install -r requirements.txt```
 
-### 3. Run "run.py" from your terminal with specified [arguments](#arguments) like:
+### 3. Run "run.py" from your terminal with specified [arguments](#arguments) like (option arguments in square brackets):
 python run.py ```-provider PROVIDER``` ```-modpack-id MODPACK-ID``` ```[--modpack-version MODPACK-VERSION]``` ```[--pterodactyl]``` ```[--clean-scripts]``` ```[--update]```
 
 ### Done!
