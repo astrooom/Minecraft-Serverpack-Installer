@@ -49,7 +49,11 @@ def get_server_modpack_url(provider, modpack_id, modpack_version, operating_syst
                 except:
                     normal_downloadurl = ""
 
+
+                print("Matching version ID: ", version_id, "against goal: ", modpack_version)
+
                 if str(version_id) == str(modpack_version):
+                    print("Found match")
                     version_id_downloadurl = requests.get(
                         f'https://addons-ecs.forgesvc.net/api/v2/addon/{modpack_id}/file/{version_id}/download-url', timeout=10, headers=HEADERS).text
                     urls = {"SpecifiedVersion": version_id_downloadurl, "LatestReleaseServerpack": "",
@@ -80,9 +84,7 @@ def get_server_modpack_url(provider, modpack_id, modpack_version, operating_syst
                             "  ", " "), urls, normal_downloadurl]
 
                         return return_list
-            else:
-                print(
-                    "This modpack version was not found. Defaulting to latest modpack version...")
+            print("This modpack version was not found. Defaulting to latest modpack version...")
 
         # If the version is set to latest or no version is provided by the user, find the latest release
 
