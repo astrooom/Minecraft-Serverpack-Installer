@@ -694,7 +694,6 @@ if mode == "pterodactyl":
     # os.system("rsync -a /mnt/server/modpack_folder/ /mnt/server/")
     # os.system("rm -rf /mnt/server/modpack_folder/*")
     # os.system("rm -r /mnt/server/modpack_folder")
-    # os.system("rm /mnt/server/requirements.txt")
 
     # Forge 1.17+ section with new startup mechanism for ptero (symlink after moving files)
     new_forge_ver = False
