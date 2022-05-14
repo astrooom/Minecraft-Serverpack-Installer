@@ -30,7 +30,7 @@ parser.add_argument("-modpack-id", type=str, required=True)
 # Version to match. Can be an ID or a version name. Will not work with provider direct.
 parser.add_argument("--modpack-version", type=str,
                     default=False, action="store")
-# pterodactyl mode will move the files to the root directory at the end.
+# pterodactyl mode will move the modpack files into a folder named modpack_folder regardless of modpack.
 parser.add_argument("--pterodactyl", default="normal", action="store_true")
 # If to clean (remove) the provided startup scripts (.sh for linux and .bat for Windows) when installing the server modpack.
 parser.add_argument("--clean-scripts", default=False, action="store_true")
@@ -661,7 +661,7 @@ if not mode == "pterodactyl":
 
 
 if mode == "pterodactyl":
-    # For Pterodactyl eggs only
+    # For Pterodactyl eggs only. Will move all modpack files into a folder called modpack_folder regardless of modpack downloaded.
     sleep(3)
     os.chdir(this_dir)
     try:
@@ -691,6 +691,7 @@ if mode == "pterodactyl":
                  join(this_dir, "modpack_folder", f))
     delete_directory(join(this_dir, folder_name))
 
+    # Done in egg install script instead.
     # os.system("rsync -a /mnt/server/modpack_folder/ /mnt/server/")
     # os.system("rm -rf /mnt/server/modpack_folder/*")
     # os.system("rm -r /mnt/server/modpack_folder")

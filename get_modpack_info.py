@@ -56,52 +56,53 @@ def get_server_modpack_url(provider, modpack_id, modpack_version, operating_syst
                     print("Matching serverpack version ID:", server_pack_id, "against goal:", modpack_version)
                     
 
-                if str(version_id) == str(modpack_version):
-                    print("Found matching pack")
-                    version_id_downloadurl = requests.get(
-                        f'https://addons-ecs.forgesvc.net/api/v2/addon/{modpack_id}/file/{version_id}/download-url', timeout=10, headers=HEADERS).text
-                    urls = {"SpecifiedVersion": version_id_downloadurl, "LatestReleaseServerpack": "",
-                            "LatestBetaServerpack": "", "LatestAlphaServerpack": "", "LatestReleaseNonServerpack": ""}
-
-                    return_list = [modpack_name.replace(
-                        "  ", " "), urls, normal_downloadurl]
-                    return return_list
-
-                
-                elif str(server_pack_id) == str(modpack_version):
-                    print("Found matching serverpack")
-                    version_id_downloadurl = requests.get(
-                        f'https://addons-ecs.forgesvc.net/api/v2/addon/{modpack_id}/file/{version_id}/download-url', timeout=10, headers=HEADERS).text
-                    urls = {"SpecifiedVersion": version_id_downloadurl, "LatestReleaseServerpack": "",
-                            "LatestBetaServerpack": "", "LatestAlphaServerpack": "", "LatestReleaseNonServerpack": ""}
-
-                    return_list = [modpack_name.replace(
-                        "  ", " "), urls, normal_downloadurl]
-                    return return_list
-                
-                print("Could not match modpack version with id. Searching by version name instead.")
-
-                date = version["fileDate"]
-                date_obj = parser.isoparse(date)
-
-                normal_downloadurl = version["downloadUrl"]
-
-                server_pack_id = version["serverPackFileId"]
-
-                if (len(str(modpack_version)) > 2) and (modpack_version) in str(display_name):
-                    try:
-                        version_serverpack_url = requests.get(
-                            f'https://addons-ecs.forgesvc.net/api/v2/addon/{modpack_id}/file/{server_pack_id}/download-url', timeout=10, headers=HEADERS).text
-                    except:
-                        version_serverpack_url = None
-
-                    if version_serverpack_url:
-                        urls = {"SpecifiedVersion": version_serverpack_url, "LatestReleaseServerpack": "",
+                    if str(version_id) == str(modpack_version):
+                        print("Found matching pack")
+                        version_id_downloadurl = requests.get(
+                            f'https://addons-ecs.forgesvc.net/api/v2/addon/{modpack_id}/file/{version_id}/download-url', timeout=10, headers=HEADERS).text
+                        urls = {"SpecifiedVersion": version_id_downloadurl, "LatestReleaseServerpack": "",
                                 "LatestBetaServerpack": "", "LatestAlphaServerpack": "", "LatestReleaseNonServerpack": ""}
+
                         return_list = [modpack_name.replace(
                             "  ", " "), urls, normal_downloadurl]
-
                         return return_list
+
+                    
+                    elif str(server_pack_id) == str(modpack_version):
+                        print("Found matching serverpack")
+                        version_id_downloadurl = requests.get(
+                            f'https://addons-ecs.forgesvc.net/api/v2/addon/{modpack_id}/file/{server_pack_id}/download-url', timeout=10, headers=HEADERS).text
+                        urls = {"SpecifiedVersion": version_id_downloadurl, "LatestReleaseServerpack": "",
+                                "LatestBetaServerpack": "", "LatestAlphaServerpack": "", "LatestReleaseNonServerpack": ""}
+
+                        return_list = [modpack_name.replace(
+                            "  ", " "), urls, normal_downloadurl]
+                        return return_list
+
+                if not modpack_version.isnumeric():
+                    print("Could not match modpack version with id. Searching by version name instead.")
+
+                    date = version["fileDate"]
+                    date_obj = parser.isoparse(date)
+
+                    normal_downloadurl = version["downloadUrl"]
+
+                    server_pack_id = version["serverPackFileId"]
+
+                    if (len(str(modpack_version)) > 2) and (modpack_version) in str(display_name):
+                        try:
+                            version_serverpack_url = requests.get(
+                                f'https://addons-ecs.forgesvc.net/api/v2/addon/{modpack_id}/file/{server_pack_id}/download-url', timeout=10, headers=HEADERS).text
+                        except:
+                            version_serverpack_url = None
+
+                        if version_serverpack_url:
+                            urls = {"SpecifiedVersion": version_serverpack_url, "LatestReleaseServerpack": "",
+                                    "LatestBetaServerpack": "", "LatestAlphaServerpack": "", "LatestReleaseNonServerpack": ""}
+                            return_list = [modpack_name.replace(
+                                "  ", " "), urls, normal_downloadurl]
+
+                            return return_list
             print("This modpack version was not found. Defaulting to latest modpack version...")
 
         # If the version is set to latest or no version is provided by the user, find the latest release
