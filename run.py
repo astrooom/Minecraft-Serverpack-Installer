@@ -229,23 +229,23 @@ if provider != "ftb":
 
     # Deletes existing libraries and user jvm args file (required for forge 1.17+)
     if remove_old_files == True:
-        print("Deleting old server folders...")
-        for libraries in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "libraries"):
+        print("Update command enabled. Cleaning old mods and libraries...")
+        for libraries in glob.glob(glob.escape(this_dir + "/") + "libraries"):
             print("Found and deleting old libraries folder",
                   libraries, ". Deleting")
             delete_tree_directory(libraries)
-        for mods in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "mods"):
+        for mods in glob.glob(glob.escape(this_dir + "/") + "mods"):
             print("Found and deleting old mods folder", mods, ". Deleting")
             delete_tree_directory(mods)
-        for coremods in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "coremods"):
+        for coremods in glob.glob(glob.escape(this_dir  + "/") + "coremods"):
             print("Found and deleting old coremods folder",
                   coremods, ". Deleting")
             delete_tree_directory(coremods)
-        for fabric_folder in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + ".fabric"):
+        for fabric_folder in glob.glob(glob.escape(this_dir + "/") + ".fabric"):
             print("Found and deleting old .fabric folder",
                   fabric_folder, ". Deleting")
             delete_tree_directory(fabric_folder)
-        for user_jvm_args in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "user_jvm_args.txt"):
+        for user_jvm_args in glob.glob(glob.escape(this_dir + "/") + "user_jvm_args.txt"):
             print("Found and deleting old user_jvm_args", user_jvm_args)
             os.remove(user_jvm_args)
     else:
