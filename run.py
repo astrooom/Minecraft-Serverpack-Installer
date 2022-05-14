@@ -672,16 +672,18 @@ if mode == "pterodactyl":
     modpack_folder_files = os.listdir(join(this_dir, folder_name))
     for f in modpack_folder_files:
         sleep(1)
-        if os.path.isdir:
-            try:
-                delete_tree_directory(join(this_dir, "modpack_folder", f))
-            except:
-                pass
-        if os.path.isfile:
-            try:
-                os.remove(join(this_dir, "modpack_folder", f))
-            except:
-                pass
+
+        # Skips deleting any files as it's done prior.
+        # if os.path.isdir:
+        #     try:
+        #         delete_tree_directory(join(this_dir, "modpack_folder", f))
+        #     except:
+        #         pass
+        # if os.path.isfile:
+        #     try:
+        #         os.remove(join(this_dir, "modpack_folder", f))
+        #     except:
+        #         pass
         try:
             move(join(this_dir, folder_name, f),
                  join(this_dir, "modpack_folder", f))
