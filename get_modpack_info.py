@@ -16,12 +16,17 @@ def get_server_modpack_url(provider, modpack_id, modpack_version, operating_syst
 
     if provider == "curse":
 
-        url = f'https://addons-ecs.forgesvc.net/api/v2/addon/{modpack_id}'
+        # OLD CURSE API:
+        #url = f'https://addons-ecs.forgesvc.net/api/v2/addon/{modpack_id}'
+
+        url = f'https://api.curseforge.com/v1/mods/{modpack_id}'
 
         HEADERS = {'user-agent': ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'),
-                   'referer': 'https://www.curseforge.com/minecraft/modpacks'}
+                   'referer': 'https://www.curseforge.com/minecraft/modpacks',
+                   'x-api-key': '$2a$10$Ynz1tT6cTV7vz1OUBS.lgOHanAXskT7KqCq6jXyRSGgk9DPA9mjEG',
+                   }
 
-        response = requests.get(url, timeout=10, headers=HEADERS).json()
+        response = requests.get(url, timeout=10, headers=HEADERS).json()["data"]
 
         modpack_name = response["name"]
 
@@ -43,7 +48,10 @@ def get_server_modpack_url(provider, modpack_id, modpack_version, operating_syst
             for version in files:
                 version_id = version["id"]
                 # is_server_pack = version["isServerPack"]
-                server_pack_id = version["serverPackFileId"]
+                try:
+                    server_pack_id = version["serverPackFileId"]
+                except:
+                    server_pack_id = 'someRandomValueBecauseSomeModpackVersionsDontHaveAServerPackId'
                 display_name = version["displayName"]
                 release_type = version["releaseType"]
                 try:
@@ -52,14 +60,18 @@ def get_server_modpack_url(provider, modpack_id, modpack_version, operating_syst
                     normal_downloadurl = ""
 
                 if modpack_version.isnumeric():
-                    print("Matching version ID:", version_id, "against goal:", modpack_version)
-                    print("Matching serverpack version ID:", server_pack_id, "against goal:", modpack_version)
-                    
+                    print("Matching version ID:", version_id,
+                          "against goal:", modpack_version)
+                    print("Matching serverpack version ID:",
+                          server_pack_id, "against goal:", modpack_version)
 
                     if str(version_id) == str(modpack_version):
                         print("Found matching pack")
+                        #/v1/mods/{modId}/files/{fileId}
                         version_id_downloadurl = requests.get(
-                            f'https://addons-ecs.forgesvc.net/api/v2/addon/{modpack_id}/file/{version_id}/download-url', timeout=10, headers=HEADERS).text
+                            # OLD CURSE API:
+                            # f'https://addons-ecs.forgesvc.net/api/v2/addon/{modpack_id}/file/{version_id}/download-url', timeout=10, headers=HEADERS).text
+                            f'https://api.curseforge.com/v1/mods/{modpack_id}/files/{version_id}/download-url', timeout=10, headers=HEADERS).json()["data"]
                         urls = {"SpecifiedVersion": version_id_downloadurl, "LatestReleaseServerpack": "",
                                 "LatestBetaServerpack": "", "LatestAlphaServerpack": "", "LatestReleaseNonServerpack": ""}
 
@@ -67,11 +79,12 @@ def get_server_modpack_url(provider, modpack_id, modpack_version, operating_syst
                             "  ", " "), urls, normal_downloadurl]
                         return return_list
 
-                    
                     elif str(server_pack_id) == str(modpack_version):
                         print("Found matching serverpack")
                         version_id_downloadurl = requests.get(
-                            f'https://addons-ecs.forgesvc.net/api/v2/addon/{modpack_id}/file/{server_pack_id}/download-url', timeout=10, headers=HEADERS).text
+                            # OLD CURSE API:
+                            # f'https://addons-ecs.forgesvc.net/api/v2/addon/{modpack_id}/file/{server_pack_id}/download-url', timeout=10, headers=HEADERS).text
+                            f'https://api.curseforge.com/v1/mods/{modpack_id}/files/{server_pack_id}/download-url', timeout=10, headers=HEADERS).json()["data"]
                         urls = {"SpecifiedVersion": version_id_downloadurl, "LatestReleaseServerpack": "",
                                 "LatestBetaServerpack": "", "LatestAlphaServerpack": "", "LatestReleaseNonServerpack": ""}
 
@@ -80,7 +93,8 @@ def get_server_modpack_url(provider, modpack_id, modpack_version, operating_syst
                         return return_list
 
                 if not modpack_version.isnumeric():
-                    print("Could not match modpack version with id. Searching by version name instead.")
+                    print(
+                        "Could not match modpack version with id. Searching by version name instead.")
 
                     date = version["fileDate"]
                     date_obj = parser.isoparse(date)
@@ -92,7 +106,9 @@ def get_server_modpack_url(provider, modpack_id, modpack_version, operating_syst
                     if (len(str(modpack_version)) > 2) and (modpack_version) in str(display_name):
                         try:
                             version_serverpack_url = requests.get(
-                                f'https://addons-ecs.forgesvc.net/api/v2/addon/{modpack_id}/file/{server_pack_id}/download-url', timeout=10, headers=HEADERS).text
+                                # OLD CURSE API:
+                                # f'https://addons-ecs.forgesvc.net/api/v2/addon/{modpack_id}/file/{server_pack_id}/download-url', timeout=10, headers=HEADERS).text
+                                f'https://api.curseforge.com/v1/mods/{modpack_id}/files/{server_pack_id}/download-url', timeout=10, headers=HEADERS).json()["data"]
                         except:
                             version_serverpack_url = None
 
@@ -103,7 +119,8 @@ def get_server_modpack_url(provider, modpack_id, modpack_version, operating_syst
                                 "  ", " "), urls, normal_downloadurl]
 
                             return return_list
-            print("This modpack version was not found. Defaulting to latest modpack version...")
+            print(
+                "This modpack version was not found. Defaulting to latest modpack version...")
 
         # If the version is set to latest or no version is provided by the user, find the latest release
 
@@ -134,21 +151,27 @@ def get_server_modpack_url(provider, modpack_id, modpack_version, operating_syst
 
         try:
             release_serverpack_url = requests.get(
-                f'https://addons-ecs.forgesvc.net/api/v2/addon/{modpack_id}/file/{release_serverpack_id}/download-url', timeout=10, headers=HEADERS).text
+                # OLD CURSE API:
+                # f'https://addons-ecs.forgesvc.net/api/v2/addon/{modpack_id}/file/{release_serverpack_id}/download-url', timeout=10, headers=HEADERS).text
+                f'https://api.curseforge.com/v1/mods/{modpack_id}/files/{release_serverpack_id}/download-url', timeout=10, headers=HEADERS).json()["data"]
         except:
             release_serverpack_url = None
             print("No release server pack was found for this modpack")
 
         try:
             beta_serverpack_url = requests.get(
-                f'https://addons-ecs.forgesvc.net/api/v2/addon/{modpack_id}/file/{beta_serverpack_id}/download-url', timeout=10, headers=HEADERS).text
+                # OLD CURSE API:
+                #f'https://addons-ecs.forgesvc.net/api/v2/addon/{modpack_id}/file/{beta_serverpack_id}/download-url', timeout=10, headers=HEADERS).text
+                f'https://api.curseforge.com/v1/mods/{modpack_id}/files/{beta_serverpack_id}/download-url', timeout=10, headers=HEADERS).json()["data"]
         except:
             beta_serverpack_url = None
             print("No beta server pack was found for this modpack")
 
         try:
             alpha_serverpack_url = requests.get(
-                f'https://addons-ecs.forgesvc.net/api/v2/addon/{modpack_id}/file/{alpha_serverpack_id}/download-url', timeout=10, headers=HEADERS).text
+                # OLD CURSE API:
+                #f'https://addons-ecs.forgesvc.net/api/v2/addon/{modpack_id}/file/{alpha_serverpack_id}/download-url', timeout=10, headers=HEADERS).text
+                f'https://api.curseforge.com/v1/mods/{modpack_id}/files/{alpha_serverpack_id}/download-url', timeout=10, headers=HEADERS).json()["data"]
         except:
             alpha_serverpack_url = None
             print("No alpha server pack was found for this modpack")
@@ -295,7 +318,6 @@ def get_server_modpack_url(provider, modpack_id, modpack_version, operating_syst
         else:
             alpha_serverbinary_url = ""
 
-
         urls = {"SpecifiedVersion": "", "LatestReleaseServerpack": release_serverbinary_url, "LatestBetaServerpack":
                 beta_serverbinary_url, "LatestAlphaServerpack": alpha_serverbinary_url, "LatestReleaseNonServerpack": ""}
         normal_downloadurl = ""
@@ -321,19 +343,20 @@ def get_server_modpack_url(provider, modpack_id, modpack_version, operating_syst
 
 def get_modpack_minecraft_version(provider, modpack_id):
     if provider == "curse":
-        url = f"https://addons-ecs.forgesvc.net/api/v2/addon/{modpack_id}"
+        # OLD CURSE API:
+        # url = f"https://addons-ecs.forgesvc.net/api/v2/addon/{modpack_id}"
+        url = f'https://api.curseforge.com/v1/mods/{modpack_id}'
 
         HEADERS = {'user-agent': ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'),
-                   'referer': 'https://www.curseforge.com/minecraft/modpacks'}
+                   'referer': 'https://www.curseforge.com/minecraft/modpacks',
+                   'x-api-key': '$2a$10$Ynz1tT6cTV7vz1OUBS.lgOHanAXskT7KqCq6jXyRSGgk9DPA9mjEG',
+                   }
 
-        response = requests.get(url, timeout=10, headers=HEADERS).json()
+        response = requests.get(url, timeout=10, headers=HEADERS).json()["data"]
 
         try:
-            latest_file = response["latestFiles"][0]
-            for ver in latest_file["gameVersion"]:
-                if contains_number(ver):
-                    game_version = ver
-            return game_version
+            latest_file = response["latestFilesIndexes"][0]
+            return latest_file['gameVersion']
         except:
             print("Could not obtain minecraft version for this modpack. Returning False")
             return False
