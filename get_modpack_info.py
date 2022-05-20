@@ -346,6 +346,50 @@ def get_server_modpack_url(provider, modpack_id, modpack_version, operating_syst
             "  ", " "), urls, normal_downloadurl]
         return return_list
 
+    if provider == "modrinth":
+        HEADERS = {'user-agent': ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'),
+            'referer': 'https://api.modpacks.ch/'}
+
+
+        url = f'https://api.modrinth.com/v2/project/{modpack_id}'
+        response = requests.get(url, timeout=10, headers=HEADERS).json()
+        modpack_name = response['title']
+
+        version_url = f'https://api.modrinth.com/v2/project/{modpack_id}/version'
+
+        version_response = requests.get(version_url, timeout=10, headers=HEADERS).json()
+
+        if modpack_version and modpack_version != "latest":
+            for version in version_response:
+                if str(version["id"]) == str(modpack_version):
+                    for version_files in version['files']:
+                        if version_files['primary'] == True:
+                            specified_version_url = version_files['url']
+                            urls = {"SpecifiedVersion": specified_version_url, "LatestReleaseServerpack": "",
+                                    "LatestBetaServerpack": "", "LatestAlphaServerpack": "", "LatestReleaseNonServerpack": ""}
+                            normal_downloadurl = ""
+                            return_list = [modpack_name.replace(
+                                "  ", " "), urls, normal_downloadurl]
+
+                            return return_list
+            print("Could not find specified modpack version. Defaulting to latest instead.")
+
+        for version in version_response:
+            for version_file in version['files']:
+                if version_file['primary'] == True:
+                    latest_version_url = version_file['url']
+                    print("Grabbed url of latest version of modpack.")
+                    urls = {"SpecifiedVersion": "", "LatestReleaseServerpack": latest_version_url,
+                    "LatestBetaServerpack": "", "LatestAlphaServerpack": "", "LatestReleaseNonServerpack": ""}
+                    normal_downloadurl = ""
+                    return_list = [modpack_name.replace(
+                        "  ", " "), urls, normal_downloadurl]
+                    return return_list
+
+        
+
+        
+
 #print(get_server_modpack_url("technic", 'tekkit-legends', "latest"))
 
 
@@ -436,3 +480,17 @@ def get_modpack_minecraft_version(provider, modpack_id):
         index -= 1
 
         return game_version
+
+
+    if provider == "modrinth":
+        url = f"https://api.modrinth.com/v2/project/{modpack_id}/version"
+        HEADERS = {'user-agent': ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'),
+                   'referer': 'https://api.modrinth.com/'}
+
+        response = requests.get(url, timeout=10, headers=HEADERS).json()
+
+        try: 
+            game_version = response[0]['game_versions'][0]
+            return game_version
+        except:
+            return False

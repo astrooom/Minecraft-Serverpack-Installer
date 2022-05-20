@@ -5,7 +5,7 @@ import shutil
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-def unzip(zip_name, modpack_name):
+def unzip(zip_name, modpack_name, file_ext):
 
     extract_dir = os.path.join(dir_path, modpack_name.replace(":", "_").replace(" ", "_").replace(",", ""))
     my_zip = os.path.join(dir_path, zip_name)

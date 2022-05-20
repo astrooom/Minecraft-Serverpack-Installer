@@ -7,6 +7,7 @@ import glob
 from shutil import move, rmtree, copy
 from get_modpack_info import get_server_modpack_url, get_modpack_minecraft_version
 from get_forge_or_fabric_version import get_forge_or_fabric_version_from_manifest
+from download_modrinth_mods import download_modrinth_mods, move_modrinth_overrides, grab_modrinth_serverjars
 from download_file import download
 from ptero_api_func import update_startup
 from unzip_modpack import unzip
@@ -22,9 +23,9 @@ parser = argparse.ArgumentParser(
     description="Set options for modpack installer.")
 
 # Required arguments
-# Provider modes: "curse", "technic", "ftb", and "direct".
+# Provider modes: "curse", "technic", "ftb", "modrinth", and "direct".
 parser.add_argument("-provider", type=str, required=True)
-# if provider is curse, provide curse modpack ID. If technic, provide technic modpack slug. If ftb, provide modpack ID. If direct, provide direct download url.
+# if provider is curse, provide curse modpack ID. If technic, provide technic modpack slug. If ftb, provide modpack ID. If modrinth provide modpack slug or modpack project ID. If direct, provide direct download url.
 parser.add_argument("-modpack-id", type=str, required=True)
 
 # Version to match. Can be an ID or a version name. Will not work with provider direct.
@@ -70,11 +71,13 @@ if modify_startup:
 
 
 interpreter_path = sys.executable
-if provider == "curse" or provider == "technic" or provider == "ftb":
+if provider == "curse" or provider == "technic" or provider == "ftb" or provider == "modrinth":
     minecraft_version = str(
         get_modpack_minecraft_version(provider, modpack_id))
+    if minecraft_version == False:
+        minecraft_version = "unknown"
 elif provider == "direct":
-    minecraft_version = "unspecified"
+    minecraft_version = "unknown"
 
 print("Installer running in", mode, "mode.")
 print("Fetching modpack from", provider + ".")
@@ -167,6 +170,13 @@ elif not modpack_urls["LatestReleaseServerpack"] and not modpack_urls["LatestBet
     print("Downloading Latest Non-Serverpack of", modpack_name + "...")
     filename = download(modpack_urls["LatestReleaseNonServerpack"])
 
+# For Modrinth modpacks.
+file_ext = pathlib.Path(filename).suffix
+if file_ext == '.mrpack':
+    print("Detected modpack with .mrpack extension. Renaming to .zip...")
+    move(filename, filename.replace('.mrpack', '.zip'))
+    filename = filename.replace('.mrpack', '.zip')
+
 sleep(2)
 
 if provider == "ftb":
@@ -194,9 +204,9 @@ if provider == "ftb":
 
 
 # Unzip downloaded modpack zip
-if provider != "ftb":
+else:
     print("Extracting downloaded modpack archive...")
-    folder_name = unzip(filename, modpack_name)
+    folder_name = unzip(filename, modpack_name, file_ext)
     modpack_folder = os.listdir(join(this_dir, folder_name))
 
     # Count number of files
@@ -251,301 +261,316 @@ if provider != "ftb":
     else:
         print("Skipping deleting old server folders.")
 
-    # Check if forge installer exists in serverpack dir. If does, run it.
-    forge_installer = False
-    for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "*forge*installer*.jar"):
-        if name:
-            forge_installer = True
-            if "1.12.2-14.23.5" not in name:
-                print("Changing Directory for included forge installer")
+    if provider == "modrinth":
+        for name in glob.glob(this_dir + "/" + folder_name + "/" + "*.json"):
+            os.chdir(f"{this_dir}/{folder_name}")
+            grab_modrinth_serverjars(name)
+            os.mkdir(f"{this_dir}/{folder_name}/mods")
+            os.chdir(f"{this_dir}/{folder_name}/mods")
+            download_modrinth_mods(name)
+            os.chdir(f"{this_dir}/{folder_name}")
+        do_override = False
+        for override in glob.glob(this_dir + "/" + folder_name + "/" + "overrides"):
+            if override:
+                do_override = True
+        if do_override == True:
+            move_modrinth_overrides(f"{this_dir}/{folder_name}")
+    else:
+        # Check if forge installer exists in serverpack dir. If does, run it.
+        forge_installer = False
+        for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "*forge*installer*.jar"):
+            if name:
+                forge_installer = True
+                if "1.12.2-14.23.5" not in name:
+                    print("Changing Directory for included forge installer")
+                    os.chdir(f"{this_dir}/{folder_name}")
+                    print("Running Forge Installer. This may take a minute or two...")
+                    os.system(f"java -jar {name} --installServer")
+                    print("Finished running forge installer")
+                    os.remove(name)
+                    print("Removed forge installer")
+                    try:
+                        os.remove(name + ".log")
+                        print("Removed forge installer log")
+                    except:
+                        pass
+                if "1.12.2-14.23.5" in name:
+                    print(
+                        "Found outdated and broken version of Forge 1.12.2. Downloading newest.")
+                    os.remove(name)
+                    twelvetwoforge = "https://maven.minecraftforge.net/net/minecraftforge/forge/1.12.2-14.23.5.2860/forge-1.12.2-14.23.5.2860-installer.jar"
+                    print("Changing Directory for downloading forge installer")
+                    os.chdir(f"{this_dir}/{folder_name}")
+                    forge_installer_dl = download(twelvetwoforge)
+                    forge_installer_dl_path = os.path.join(
+                        this_dir, folder_name, forge_installer_dl)
+                    print("Running Forge Installer. This may take a minute or two...")
+                    os.system(
+                        f"java -jar {forge_installer_dl_path} --installServer")
+                    os.remove(forge_installer_dl_path)
+                    print("Removed forge installer")
+                    try:
+                        os.remove(forge_installer_dl_path + ".log")
+                        print("Removed forge installer log")
+                    except:
+                        pass
+
+        # Check if fabric installer exists in serverpack dir. If does, run it.
+        fabric_installer = False
+        for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "*fabric*installer*.jar"):
+            if name:
+                fabric_installer = True
+                print("Changing Directory for included fabric installer")
                 os.chdir(f"{this_dir}/{folder_name}")
-                print("Running Forge Installer. This may take a minute or two...")
-                os.system(f"java -jar {name} --installServer")
-                print("Finished running forge installer")
+                print("Running Fabric Installer. This may take a minute or two...")
+                # Downloads the minecraft server version as well with -downloadMinecraft
+                os.system(f"java -jar {name} server -downloadMinecraft")
+                print("Finished running fabric installer")
                 os.remove(name)
-                print("Removed forge installer")
+                print("Removed fabric installer")
                 try:
                     os.remove(name + ".log")
-                    print("Removed forge installer log")
+                    print("Removed fabric installer log")
                 except:
                     pass
-            if "1.12.2-14.23.5" in name:
-                print(
-                    "Found outdated and broken version of Forge 1.12.2. Downloading newest.")
-                os.remove(name)
-                twelvetwoforge = "https://maven.minecraftforge.net/net/minecraftforge/forge/1.12.2-14.23.5.2860/forge-1.12.2-14.23.5.2860-installer.jar"
-                print("Changing Directory for downloading forge installer")
-                os.chdir(f"{this_dir}/{folder_name}")
-                forge_installer_dl = download(twelvetwoforge)
-                forge_installer_dl_path = os.path.join(
-                    this_dir, folder_name, forge_installer_dl)
-                print("Running Forge Installer. This may take a minute or two...")
-                os.system(
-                    f"java -jar {forge_installer_dl_path} --installServer")
-                os.remove(forge_installer_dl_path)
-                print("Removed forge installer")
-                try:
-                    os.remove(forge_installer_dl_path + ".log")
-                    print("Removed forge installer log")
-                except:
-                    pass
-
-    # Check if fabric installer exists in serverpack dir. If does, run it.
-    fabric_installer = False
-    for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "*fabric*installer*.jar"):
-        if name:
-            fabric_installer = True
-            print("Changing Directory for included fabric installer")
-            os.chdir(f"{this_dir}/{folder_name}")
-            print("Running Fabric Installer. This may take a minute or two...")
-            # Downloads the minecraft server version as well with -downloadMinecraft
-            os.system(f"java -jar {name} server -downloadMinecraft")
-            print("Finished running fabric installer")
-            os.remove(name)
-            print("Removed fabric installer")
+        renamed_serverjar = False
+        if fabric_installer:
             try:
-                os.remove(name + ".log")
-                print("Removed fabric installer log")
+                move("server.jar", "vanilla.jar")
+                print("Renamed server.jar to vanilla.jar")
             except:
                 pass
-    renamed_serverjar = False
-    if fabric_installer:
-        try:
-            move("server.jar", "vanilla.jar")
-            print("Renamed server.jar to vanilla.jar")
-        except:
-            pass
-        try:
-            move("fabric-server-launch.jar", "server.jar")
-            renamed_serverjar = True
-            print("Renamed fabric-server-launch.jar to server.jar")
-        except:
-            pass
-        try:
-            os.system(
-                'echo serverJar=vanilla.jar > fabric-server-launcher.properties')
-            print("Changed fabric-server-launcher jar to downloaded vanilla.jar")
-        except:
-            pass
+            try:
+                move("fabric-server-launch.jar", "server.jar")
+                renamed_serverjar = True
+                print("Renamed fabric-server-launch.jar to server.jar")
+            except:
+                pass
+            try:
+                os.system(
+                    'echo serverJar=vanilla.jar > fabric-server-launcher.properties')
+                print("Changed fabric-server-launcher jar to downloaded vanilla.jar")
+            except:
+                pass
 
-    # Check if serverstarter installer exists in serverpack dir. If does, run it.
-    serverstarter_installer = False
-    serverstarter_fabric = False
-    for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "*.yaml"):
-        if name:
-            serverstarter_installer = True
-            serverstarter_installpath = f"{this_dir}/{folder_name}/"
-            print("Changing serverstarter install path to modpack directory")
-            # Changes the installpath of the serverstarter script to base directory instead of the default /setup
-            change_installpath(name, serverstarter_installpath)
-
-            if operating_system == "Windows":
-                file_ext = "*.bat"
-                print("Detected Windows Operating System")
-            if operating_system == "Linux":
-                file_ext = "*.sh"
-                print("Detected Linux Operating System")
-            if operating_system == "Mac OS":
-                file_ext = "*.sh"
-                print("Detected Mac OS Operating System")
-            for file in glob.glob(this_dir + "/" + folder_name + "/" + f"{file_ext}"):
-                print("Changing Directory for serverstarter installer")
-                os.chdir(f"{this_dir}/{folder_name}")
-                print(
-                    "Running Serverstarter Installer. This may take a minute or two...")
-                if file_ext == "*.sh":
-                    os.system(f"chmod +x {file}")
-                p = subprocess.Popen(
-                    f"{file}", stdout=subprocess.PIPE, shell=True)
-                for line in p.stdout:
-                    print(line.decode())
-                    if b"fabric-server-launch.jar" in line:
-                        serverstarter_fabric = True
-                    if b"The server installed successfully" in line or b"Done installing loader" in line or b"deleting installer" in line or b"EULA" in line or b"eula" in line:
-                        # Terminates script when script has successfully installed all mods and forge files etc. and stops it from running the server
-                        print("Got Installer Finished Message")
-                        break
-                kill(p.pid)
-                print("Terminated serverstarter installer")
-                print("Deleting leftover serverstarter installer file")
-                os.remove(file)
-
-    if serverstarter_fabric:
-        try:
-            move("server.jar", "vanilla.jar")
-            print("Renamed server.jar to vanilla.jar")
-        except:
-            pass
-        try:
-            move("fabric-server-launch.jar", "server.jar")
-            renamed_serverjar = True
-            print("Renamed fabric-server-launch.jar to server.jar")
-        except:
-            pass
-        try:
-            os.system(
-                'echo serverJar=vanilla.jar > fabric-server-launcher.properties')
-            print("Changed fabric-server-launcher jar to downloaded vanilla.jar")
-        except:
-            pass
-
-    #Check if mods.csv file is found. If so, run its install script.
-    mods_csv_installer = False
-    if not forge_installer and not serverstarter_installer:
-        for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "*.csv"):
+        # Check if serverstarter installer exists in serverpack dir. If does, run it.
+        serverstarter_installer = False
+        serverstarter_fabric = False
+        for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "*.yaml"):
             if name:
-                print("Detected mods.csv installer.")
-                mods_csv_installer = True
+                serverstarter_installer = True
+                serverstarter_installpath = f"{this_dir}/{folder_name}/"
+                print("Changing serverstarter install path to modpack directory")
+                # Changes the installpath of the serverstarter script to base directory instead of the default /setup
+                change_installpath(name, serverstarter_installpath)
+
                 if operating_system == "Windows":
                     file_ext = "*.bat"
                     print("Detected Windows Operating System")
                 if operating_system == "Linux":
                     file_ext = "*.sh"
                     print("Detected Linux Operating System")
-            for file in glob.glob(this_dir + "/" + folder_name + "/" + f"{file_ext}"):
-                if operating_system == "Linux":
-                    os.system(f"chmod +x {file}")
-                print("Changing Directory for mods.csv installer")
-                os.chdir(f"{this_dir}/{folder_name}")
-                print("Running mods.csv installer. This may take a minute or two...")
-                p = subprocess.Popen(f"{file}", stdin=subprocess.PIPE,
-                                     stdout=subprocess.PIPE, shell=True)
-                p.communicate(input=b"\n")
-                try:
-                    p.wait(timeout=15)
-                except subprocess.TimeoutExpired:
-                    print("Timeout reached for mods.csv installer subprocess. Killing.")
+                if operating_system == "Mac OS":
+                    file_ext = "*.sh"
+                    print("Detected Mac OS Operating System")
+                for file in glob.glob(this_dir + "/" + folder_name + "/" + f"{file_ext}"):
+                    print("Changing Directory for serverstarter installer")
+                    os.chdir(f"{this_dir}/{folder_name}")
+                    print(
+                        "Running Serverstarter Installer. This may take a minute or two...")
+                    if file_ext == "*.sh":
+                        os.system(f"chmod +x {file}")
+                    p = subprocess.Popen(
+                        f"{file}", stdout=subprocess.PIPE, shell=True)
+                    for line in p.stdout:
+                        print(line.decode())
+                        if b"fabric-server-launch.jar" in line:
+                            serverstarter_fabric = True
+                        if b"The server installed successfully" in line or b"Done installing loader" in line or b"deleting installer" in line or b"EULA" in line or b"eula" in line:
+                            # Terminates script when script has successfully installed all mods and forge files etc. and stops it from running the server
+                            print("Got Installer Finished Message")
+                            break
                     kill(p.pid)
-                print("Removing mods.csv server installer")
-                os.remove(file)
+                    print("Terminated serverstarter installer")
+                    print("Deleting leftover serverstarter installer file")
+                    os.remove(file)
 
-    if (forge_installer or serverstarter_installer or fabric_installer) and not renamed_serverjar:
-        server_jar_found = False
-        for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "*"):
-            if "server.jar" in name:
-                print(name)
-                server_jar_found = True
-                sever_jar_path = name
-        if server_jar_found:
-            print("Found old server.jar file. Deleting.")
-            os.remove(sever_jar_path)
-
-    # If there is no forge, fabric or serverstarter installer, but a manifest.json file. Download the mods manually using a separate script.
-    manifest_installer = False
-    if not forge_installer and not serverstarter_installer and not mods_csv_installer:
-        for name in glob.glob(this_dir + "/" + folder_name + "/" + "manifest.json"):
-            if name:
-                manifest_installer = True
-                print("Running manifest installer...")
+        if serverstarter_fabric:
+            try:
+                move("server.jar", "vanilla.jar")
+                print("Renamed server.jar to vanilla.jar")
+            except:
+                pass
+            try:
+                move("fabric-server-launch.jar", "server.jar")
+                renamed_serverjar = True
+                print("Renamed fabric-server-launch.jar to server.jar")
+            except:
+                pass
+            try:
                 os.system(
-                    f'''java -jar "{this_dir}/ModpackDownloader-cli-0.7.2.jar" -manifest "{this_dir}/{folder_name}/manifest.json" -folder "{this_dir}/{folder_name}/mods"''')
+                    'echo serverJar=vanilla.jar > fabric-server-launcher.properties')
+                print("Changed fabric-server-launcher jar to downloaded vanilla.jar")
+            except:
+                pass
 
-    # If there was no included forge/fabric or serverstarter installer, as well as no manifest.json provided in the serverpack, look for existing forge or fabric server jar. If they don't exist, get the manifest file and download the correct forge/fabric version and install it.
-    server_jar_found = False
-    if not forge_installer and not serverstarter_installer and not fabric_installer and not mods_csv_installer:
-        print("Neither a forge installer or a serverstarter installer was found for the downloaded pack. Checking if forge/fabric jar already exists...")
-        for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "*"):
-            if ".jar" in name.lower() and "minecraft" not in name.lower():
-                server_jar_found = True
-                print(
-                    "Found Server Jar. Renaming it to server.jar if it has other name.")
-                sever_jar_path = name
-                move(sever_jar_path, (os.path.dirname(
-                    sever_jar_path)) + '/server.jar')
-
-        # if server_jar_found:
-        #     print("Found old server.jar.")
-        #     os.remove(sever_jar_path)
-
-        if not server_jar_found:
-            manifest_file_found = False
-            print("No forge or fabric file found. Checking for manifest.json...")
-            for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "manifest.json"):
+        #Check if mods.csv file is found. If so, run its install script.
+        mods_csv_installer = False
+        if not forge_installer and not serverstarter_installer:
+            for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "*.csv"):
                 if name:
-                    manifest_file_found = True
-                    print(
-                        "Found manifest file in modpack folder. Grabbing forge or fabric version...")
-                    grabbed_manifest_version = get_forge_or_fabric_version_from_manifest(
-                        name)
-                    modpack_jar_type = grabbed_manifest_version[0]
-                    modpack_jar_version = grabbed_manifest_version[1]
+                    print("Detected mods.csv installer.")
+                    mods_csv_installer = True
+                    if operating_system == "Windows":
+                        file_ext = "*.bat"
+                        print("Detected Windows Operating System")
+                    if operating_system == "Linux":
+                        file_ext = "*.sh"
+                        print("Detected Linux Operating System")
+                for file in glob.glob(this_dir + "/" + folder_name + "/" + f"{file_ext}"):
+                    if operating_system == "Linux":
+                        os.system(f"chmod +x {file}")
+                    print("Changing Directory for mods.csv installer")
+                    os.chdir(f"{this_dir}/{folder_name}")
+                    print("Running mods.csv installer. This may take a minute or two...")
+                    p = subprocess.Popen(f"{file}", stdin=subprocess.PIPE,
+                                        stdout=subprocess.PIPE, shell=True)
+                    p.communicate(input=b"\n")
+                    try:
+                        p.wait(timeout=15)
+                    except subprocess.TimeoutExpired:
+                        print("Timeout reached for mods.csv installer subprocess. Killing.")
+                        kill(p.pid)
+                    print("Removing mods.csv server installer")
+                    os.remove(file)
 
-            if not manifest_file_found:
-                if modpack_normal_downloadurl:
-                    print(
-                        "No manifest.json was found. Checking for it with normal downloadurl link...")
-                    filename = download(modpack_normal_downloadurl)
-                    temp_folder = unzip(filename, "manifest_check")
-                    for name in glob.glob(glob.escape(this_dir + "/" + temp_folder + "/") + "manifest.json"):
-                        if name:
-                            print(
-                                "Found manifest.json file in normal (non-serverpack) folder. Grabbing forge or fabric version...")
-                            grabbed_manifest_version = get_forge_or_fabric_version_from_manifest(
-                                name)
-                            modpack_jar_type = grabbed_manifest_version[0]
-                            modpack_jar_version = grabbed_manifest_version[1]
-                            delete_tree_directory(this_dir + "/" + temp_folder)
-                            print("Deleted temp folder")
-
-            if modpack_jar_type == "forge":
-                if "1.12.2-14.23.5" in modpack_jar_version:
-                    print(
-                        "Found outdated and broken version of forge 1.12.2. Downloading latest for 1.12.2 instead.")
-                    forge_installer_url = 'https://maven.minecraftforge.net/net/minecraftforge/forge/1.12.2-14.23.5.2860/forge-1.12.2-14.23.5.2860-installer.jar'
-                else:
-                    forge_installer_url = f'https://files.minecraftforge.net/maven/net/minecraftforge/forge/{modpack_jar_version}/forge-{modpack_jar_version}-installer.jar'
-                os.chdir(f"{this_dir}/{folder_name}")
-                filename = download(forge_installer_url)
-                for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + filename):
-                    if name:
-                        print("Changing Directory to not-included forge installer")
-                        os.chdir(f"{this_dir}/{folder_name}")
-                        print(
-                            "Running Forge Installer. This may take a minute or two...")
-                        os.system(f'java -jar "{name}" --installServer')
-                        print("Finished running forge installer")
-                        os.remove(name)
-                        print("Removed forge installer")
-                        try:
-                            os.remove(name + ".log")
-                            print("Removed forge installer log")
-                        except:
-                            pass
-            if modpack_jar_type == "fabric":
-                # ! Will manually have to be changed as there is no hosted link to always get the latest fabric loader
-                fabric_installer_url = 'https://maven.fabricmc.net/net/fabricmc/fabric-installer/0.10.2/fabric-installer-0.10.2.jar'
-                os.chdir(f"{this_dir}/{folder_name}")
-                filename = download(fabric_installer_url)
-                for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + filename):
+        if (forge_installer or serverstarter_installer or fabric_installer) and not renamed_serverjar:
+            server_jar_found = False
+            for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "*"):
+                if "server.jar" in name:
                     print(name)
+                    server_jar_found = True
+                    sever_jar_path = name
+            if server_jar_found:
+                print("Found old server.jar file. Deleting.")
+                os.remove(sever_jar_path)
+
+        # If there is no forge, fabric or serverstarter installer, but a manifest.json file. Download the mods manually using a separate script.
+        manifest_installer = False
+        if not forge_installer and not serverstarter_installer and not mods_csv_installer:
+            for name in glob.glob(this_dir + "/" + folder_name + "/" + "manifest.json"):
+                if name:
+                    manifest_installer = True
+                    print("Running manifest installer...")
+                    os.system(
+                        f'''java -jar "{this_dir}/ModpackDownloader-cli-0.7.2.jar" -manifest "{this_dir}/{folder_name}/manifest.json" -folder "{this_dir}/{folder_name}/mods"''')
+
+        # If there was no included forge/fabric or serverstarter installer, as well as no manifest.json provided in the serverpack, look for existing forge or fabric server jar. If they don't exist, get the manifest file and download the correct forge/fabric version and install it.
+        server_jar_found = False
+        if not forge_installer and not serverstarter_installer and not fabric_installer and not mods_csv_installer:
+            print("Neither a forge installer or a serverstarter installer was found for the downloaded pack. Checking if forge/fabric jar already exists...")
+            for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "*"):
+                if ".jar" in name.lower() and "minecraft" not in name.lower():
+                    server_jar_found = True
+                    print(
+                        "Found Server Jar. Renaming it to server.jar if it has other name.")
+                    sever_jar_path = name
+                    move(sever_jar_path, (os.path.dirname(
+                        sever_jar_path)) + '/server.jar')
+
+            # if server_jar_found:
+            #     print("Found old server.jar.")
+            #     os.remove(sever_jar_path)
+
+            if not server_jar_found:
+                manifest_file_found = False
+                print("No forge or fabric file found. Checking for manifest.json...")
+                for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "manifest.json"):
                     if name:
-                        print("Changing Directory to not-included fabric installer")
-                        os.chdir(f"{this_dir}/{folder_name}")
+                        manifest_file_found = True
                         print(
-                            "Running Fabric Loader. This may take a minute or two...")
-                        os.system(
-                            f'java -jar "{name}" server -mcversion {modpack_jar_version} -downloadMinecraft')
-                        print("Finished running Fabric Loader")
-                        os.remove(name)
-                        print("Removed Fabric Loader jar")
-                        try:
-                            move("server.jar", "vanilla.jar")
-                            print("Renamed server.jar to vanilla.jar")
-                        except:
-                            pass
-                        try:
-                            move("fabric-server-launch.jar", "server.jar")
-                            renamed_serverjar = True
-                            print("Renamed fabric-server-launch.jar to server.jar")
-                        except:
-                            pass
-                        try:
-                            os.system(
-                                'echo serverJar=vanilla.jar > fabric-server-launcher.properties')
+                            "Found manifest file in modpack folder. Grabbing forge or fabric version...")
+                        grabbed_manifest_version = get_forge_or_fabric_version_from_manifest(
+                            name)
+                        modpack_jar_type = grabbed_manifest_version[0]
+                        modpack_jar_version = grabbed_manifest_version[1]
+
+                if not manifest_file_found:
+                    if modpack_normal_downloadurl:
+                        print(
+                            "No manifest.json was found. Checking for it with normal downloadurl link...")
+                        filename = download(modpack_normal_downloadurl)
+                        temp_folder = unzip(filename, "manifest_check")
+                        for name in glob.glob(glob.escape(this_dir + "/" + temp_folder + "/") + "manifest.json"):
+                            if name:
+                                print(
+                                    "Found manifest.json file in normal (non-serverpack) folder. Grabbing forge or fabric version...")
+                                grabbed_manifest_version = get_forge_or_fabric_version_from_manifest(
+                                    name)
+                                modpack_jar_type = grabbed_manifest_version[0]
+                                modpack_jar_version = grabbed_manifest_version[1]
+                                delete_tree_directory(this_dir + "/" + temp_folder)
+                                print("Deleted temp folder")
+
+                if modpack_jar_type == "forge":
+                    if "1.12.2-14.23.5" in modpack_jar_version:
+                        print(
+                            "Found outdated and broken version of forge 1.12.2. Downloading latest for 1.12.2 instead.")
+                        forge_installer_url = 'https://maven.minecraftforge.net/net/minecraftforge/forge/1.12.2-14.23.5.2860/forge-1.12.2-14.23.5.2860-installer.jar'
+                    else:
+                        forge_installer_url = f'https://files.minecraftforge.net/maven/net/minecraftforge/forge/{modpack_jar_version}/forge-{modpack_jar_version}-installer.jar'
+                    os.chdir(f"{this_dir}/{folder_name}")
+                    filename = download(forge_installer_url)
+                    for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + filename):
+                        if name:
+                            print("Changing Directory to not-included forge installer")
+                            os.chdir(f"{this_dir}/{folder_name}")
                             print(
-                                "Changed fabric-server-launcher jar to renamed vanilla.jar")
-                        except:
-                            pass
+                                "Running Forge Installer. This may take a minute or two...")
+                            os.system(f'java -jar "{name}" --installServer')
+                            print("Finished running forge installer")
+                            os.remove(name)
+                            print("Removed forge installer")
+                            try:
+                                os.remove(name + ".log")
+                                print("Removed forge installer log")
+                            except:
+                                pass
+                if modpack_jar_type == "fabric":
+                    # ! Will manually have to be changed as there is no hosted link to always get the latest fabric loader
+                    fabric_installer_url = 'https://maven.fabricmc.net/net/fabricmc/fabric-installer/0.10.2/fabric-installer-0.10.2.jar'
+                    os.chdir(f"{this_dir}/{folder_name}")
+                    filename = download(fabric_installer_url)
+                    for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + filename):
+                        print(name)
+                        if name:
+                            print("Changing Directory to not-included fabric installer")
+                            os.chdir(f"{this_dir}/{folder_name}")
+                            print(
+                                "Running Fabric Loader. This may take a minute or two...")
+                            os.system(
+                                f'java -jar "{name}" server -mcversion {modpack_jar_version} -downloadMinecraft')
+                            print("Finished running Fabric Loader")
+                            os.remove(name)
+                            print("Removed Fabric Loader jar")
+                            try:
+                                move("server.jar", "vanilla.jar")
+                                print("Renamed server.jar to vanilla.jar")
+                            except:
+                                pass
+                            try:
+                                move("fabric-server-launch.jar", "server.jar")
+                                renamed_serverjar = True
+                                print("Renamed fabric-server-launch.jar to server.jar")
+                            except:
+                                pass
+                            try:
+                                os.system(
+                                    'echo serverJar=vanilla.jar > fabric-server-launcher.properties')
+                                print(
+                                    "Changed fabric-server-launcher jar to renamed vanilla.jar")
+                            except:
+                                pass
 
 
 # Garbage files cleanup
@@ -577,6 +602,11 @@ for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "*README
     if name:
         print("Removing", name)
         os.remove(name)
+for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "overrides"):
+    if name:
+        print("Removing tree directory", name)
+        delete_tree_directory(name)
+
 
 
 # If set to true, script will delete provided server startup script (.sh for linux and .bat for Windows).
