@@ -264,9 +264,12 @@ else:
 
     if provider == "modrinth":
         for name in glob.glob(this_dir + "/" + folder_name + "/" + "modrinth.index.json"):
+            os.chdir(f"{this_dir}/{folder_name}")
+            grab_modrinth_serverjars(name)
             mods_folder_exists = os.path.exists(f"{this_dir}/{folder_name}/mods")
             if not mods_folder_exists:
                 os.mkdir(f"{this_dir}/{folder_name}/mods")
+
             os.chdir(f"{this_dir}/{folder_name}/mods")
             download_modrinth_mods(name)
             os.chdir(f"{this_dir}/{folder_name}")
@@ -278,7 +281,6 @@ else:
             move_modrinth_overrides(f"{this_dir}/{folder_name}")
             os.chdir(f"{this_dir}/{folder_name}")
             delete_tree_directory(this_dir + "/" + folder_name + "/" + "overrides")
-            grab_modrinth_serverjars(name)
     else:
         # Check if forge installer exists in serverpack dir. If does, run it.
         forge_installer = False
