@@ -44,38 +44,43 @@ def grab_modrinth_serverjars(path):
         print("Starting download of modpack server jars.")
 
         dependencies = data['dependencies']
+        dependency_names = []
+        for key, value in dependencies.items():
+            dependency_names.append(key)
         for key, value in dependencies.items():
             if key == "minecraft":
                 minecraft_version = value
-                launchermeta_url = f"https://launchermeta.mojang.com/mc/game/version_manifest_v2.json"
-                HEADERS = {
-                    'user-agent': ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'), }
+                if "forge" not in dependency_names:
+                    launchermeta_url = f"https://launchermeta.mojang.com/mc/game/version_manifest_v2.json"
+                    HEADERS = {
+                        'user-agent': ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'), }
 
-                launchermeta_response = requests.get(
-                    launchermeta_url, timeout=10, headers=HEADERS).json()
-                for version in launchermeta_response['versions']:
-                    if version['id'] == minecraft_version:
-                        print(
-                            f"Found minecraft version {version['id']}. Prepairing to download this minecraft server jar...")
-                        launchermeta_specifiedversion_url = version["url"]
+                    launchermeta_response = requests.get(
+                        launchermeta_url, timeout=10, headers=HEADERS).json()
+                    for version in launchermeta_response['versions']:
+                        if version['id'] == minecraft_version:
+                            print(
+                                f"Found minecraft version {version['id']}. Preparing to download this minecraft server jar...")
+                            launchermeta_specifiedversion_url = version["url"]
 
-                        launchermeta_specifiedversion_response = requests.get(
-                            launchermeta_specifiedversion_url, timeout=10, headers=HEADERS).json()
+                            launchermeta_specifiedversion_response = requests.get(
+                                launchermeta_specifiedversion_url, timeout=10, headers=HEADERS).json()
 
-                        minecraft_version_downloads = launchermeta_specifiedversion_response[
-                            "downloads"]
+                            minecraft_version_downloads = launchermeta_specifiedversion_response[
+                                "downloads"]
 
-                        for dkey, dvalue in minecraft_version_downloads.items():
-                            if dkey == "server":
-                                serverjar_downloadurl = dvalue['url']
-                                vanilla_jar_filename = download(
-                                    serverjar_downloadurl)
-                                sleep(1)
-                                move(vanilla_jar_filename, 'vanilla.jar')
+                            for dkey, dvalue in minecraft_version_downloads.items():
+                                if dkey == "server":
+                                    serverjar_downloadurl = dvalue['url']
+                                    vanilla_jar_filename = download(
+                                        serverjar_downloadurl)
+                                    sleep(1)
+                                    move(vanilla_jar_filename, 'vanilla.jar')
 
-            if key == "fabric-loader":
+            elif key == "fabric-loader":
                 fabric_loader_version = value
-                print(f"Found Fabric version {fabric_loader_version}. Prepairing to download and install this Fabric server jar...")
+                print(
+                    f"Found Fabric version {fabric_loader_version}. Preparing to download and install this Fabric server jar...")
                 fabric_installer_url = 'https://maven.fabricmc.net/net/fabricmc/fabric-installer/0.10.2/fabric-installer-0.10.2.jar'
                 fabric_installer_filename = download(fabric_installer_url)
                 sleep(1)
@@ -85,14 +90,19 @@ def grab_modrinth_serverjars(path):
                 try:
                     os.system(
                         'echo serverJar=vanilla.jar > fabric-server-launcher.properties')
-                    print("Changed fabric-server-launcher jar to downloaded vanilla.jar")
+                    print(
+                        "Changed fabric-server-launcher jar to downloaded vanilla.jar")
                 except:
                     pass
 
-            if key == "forge":
+            elif key == "forge":
                 forge_version = value
-                print(f"Found Forge version {forge_version}. Prepairing to download and install this Forge server jar...")
-                forge_url = f'https://maven.minecraftforge.net/net/minecraftforge/forge/{minecraft_version}-{forge_version}/forge-{minecraft_version}-{forge_version}-universal.jar'
-                forge_universal_filename = download(forge_url)
+                print(
+                    f"Found Forge version {forge_version}. Preparing to download and install this Forge server jar...")
+                forge_url = f'https://maven.minecraftforge.net/net/minecraftforge/forge/{minecraft_version}-{forge_version}/forge-{minecraft_version}-{forge_version}-installer.jar'
+                forge_installer_filename = download(forge_url)
+                print("Running Forge Installer. This may take a minute or two...")
+                os.system(
+                    f"java -jar {forge_installer_filename} --installServer")
+                os.remove(forge_installer_filename)
                 sleep(1)
-                move(forge_universal_filename, "server.jar")
