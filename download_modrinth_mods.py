@@ -1,8 +1,6 @@
 import os
-import pathlib
 from shutil import move
 import json
-import glob
 from time import sleep
 import requests
 
@@ -27,6 +25,7 @@ def download_modrinth_mods(path):
             if mod['downloads']:
                 download(mod['downloads'][0])
 
+        sleep(1)
         print("Finished downloading all server mods for modrinth modpack.")
 
 
@@ -79,6 +78,7 @@ def grab_modrinth_serverjars(path):
                 print(f"Found Fabric version {fabric_loader_version}. Prepairing to download and install this Fabric server jar...")
                 fabric_installer_url = 'https://maven.fabricmc.net/net/fabricmc/fabric-installer/0.10.2/fabric-installer-0.10.2.jar'
                 fabric_installer_filename = download(fabric_installer_url)
+                sleep(1)
                 os.system(
                     f"java -jar {fabric_installer_filename} server -loader {fabric_loader_version}")
                 move('fabric-server-launch.jar', 'server.jar')
@@ -94,4 +94,5 @@ def grab_modrinth_serverjars(path):
                 print(f"Found Forge version {forge_version}. Prepairing to download and install this Forge server jar...")
                 forge_url = f'https://maven.minecraftforge.net/net/minecraftforge/forge/{minecraft_version}-{forge_version}/forge-{minecraft_version}-{forge_version}-universal.jar'
                 forge_universal_filename = download(forge_url)
+                sleep(1)
                 move(forge_universal_filename, "server.jar")

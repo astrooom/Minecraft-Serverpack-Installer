@@ -263,9 +263,7 @@ else:
         print("Skipping deleting old server folders.")
 
     if provider == "modrinth":
-        for name in glob.glob(this_dir + "/" + folder_name + "/" + "*.json"):
-            os.chdir(f"{this_dir}/{folder_name}")
-            grab_modrinth_serverjars(name)
+        for name in glob.glob(this_dir + "/" + folder_name + "/" + "modrinth.index.json"):
             mods_folder_exists = os.path.exists(f"{this_dir}/{folder_name}/mods")
             if not mods_folder_exists:
                 os.mkdir(f"{this_dir}/{folder_name}/mods")
@@ -278,6 +276,9 @@ else:
                 do_override = True
         if do_override == True:
             move_modrinth_overrides(f"{this_dir}/{folder_name}")
+            os.chdir(f"{this_dir}/{folder_name}")
+            delete_tree_directory(this_dir + "/" + folder_name + "/" + "overrides")
+            grab_modrinth_serverjars(name)
     else:
         # Check if forge installer exists in serverpack dir. If does, run it.
         forge_installer = False
