@@ -26,7 +26,8 @@ def get_server_modpack_url(provider, modpack_id, modpack_version, operating_syst
                    'x-api-key': '$2a$10$Ynz1tT6cTV7vz1OUBS.lgOHanAXskT7KqCq6jXyRSGgk9DPA9mjEG',
                    }
 
-        response = requests.get(url, timeout=10, headers=HEADERS).json()["data"]
+        response = requests.get(
+            url, timeout=10, headers=HEADERS).json()["data"]
 
         modpack_name = response["name"]
 
@@ -67,7 +68,7 @@ def get_server_modpack_url(provider, modpack_id, modpack_version, operating_syst
 
                     if str(version_id) == str(modpack_version):
                         print("Found matching pack")
-                        #/v1/mods/{modId}/files/{fileId}
+                        # /v1/mods/{modId}/files/{fileId}
                         version_id_downloadurl = requests.get(
                             # OLD CURSE API:
                             # f'https://addons-ecs.forgesvc.net/api/v2/addon/{modpack_id}/file/{version_id}/download-url', timeout=10, headers=HEADERS).text
@@ -161,7 +162,7 @@ def get_server_modpack_url(provider, modpack_id, modpack_version, operating_syst
         try:
             beta_serverpack_url = requests.get(
                 # OLD CURSE API:
-                #f'https://addons-ecs.forgesvc.net/api/v2/addon/{modpack_id}/file/{beta_serverpack_id}/download-url', timeout=10, headers=HEADERS).text
+                # f'https://addons-ecs.forgesvc.net/api/v2/addon/{modpack_id}/file/{beta_serverpack_id}/download-url', timeout=10, headers=HEADERS).text
                 f'https://api.curseforge.com/v1/mods/{modpack_id}/files/{beta_serverpack_id}/download-url', timeout=10, headers=HEADERS).json()["data"]
         except:
             beta_serverpack_url = None
@@ -170,7 +171,7 @@ def get_server_modpack_url(provider, modpack_id, modpack_version, operating_syst
         try:
             alpha_serverpack_url = requests.get(
                 # OLD CURSE API:
-                #f'https://addons-ecs.forgesvc.net/api/v2/addon/{modpack_id}/file/{alpha_serverpack_id}/download-url', timeout=10, headers=HEADERS).text
+                # f'https://addons-ecs.forgesvc.net/api/v2/addon/{modpack_id}/file/{alpha_serverpack_id}/download-url', timeout=10, headers=HEADERS).text
                 f'https://api.curseforge.com/v1/mods/{modpack_id}/files/{alpha_serverpack_id}/download-url', timeout=10, headers=HEADERS).json()["data"]
         except:
             alpha_serverpack_url = None
@@ -201,9 +202,16 @@ def get_server_modpack_url(provider, modpack_id, modpack_version, operating_syst
         return return_list
 
     if provider == "technic":
-        url = f"https://api.technicpack.net/modpack/{modpack_id}?build=729"
         HEADERS = {'user-agent': ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'),
                    'referer': 'https://www.technicpack.net/'}
+
+        # Get latest launcher build number requires in requests to official Technic API.
+        build_request_url = 'http://api.technicpack.net/launcher/version/stable4'
+        build_response = requests.get(
+            build_request_url, timeout=10, headers=HEADERS).json()
+        latest_build = build_response["build"]
+
+        url = f"https://api.technicpack.net/modpack/{modpack_id}?build={latest_build}"
 
         response = requests.get(url, timeout=10, headers=HEADERS).json()
 
@@ -352,7 +360,8 @@ def get_modpack_minecraft_version(provider, modpack_id):
                    'x-api-key': '$2a$10$Ynz1tT6cTV7vz1OUBS.lgOHanAXskT7KqCq6jXyRSGgk9DPA9mjEG',
                    }
 
-        response = requests.get(url, timeout=10, headers=HEADERS).json()["data"]
+        response = requests.get(
+            url, timeout=10, headers=HEADERS).json()["data"]
 
         try:
             latest_file = response["latestFilesIndexes"][0]
@@ -362,9 +371,16 @@ def get_modpack_minecraft_version(provider, modpack_id):
             return False
 
     if provider == "technic":
-        main_url = f"https://solder.technicpack.net/api/modpack/{modpack_id}"
         HEADERS = {'user-agent': ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'),
                    'referer': 'https://www.technicpack.net/'}
+
+        # Get latest launcher build number requires in requests to official Technic API.
+        build_request_url = 'http://api.technicpack.net/launcher/version/stable4'
+        build_response = requests.get(
+            build_request_url, timeout=10, headers=HEADERS).json()
+        latest_build = build_response["build"]
+
+        main_url = f"https://solder.technicpack.net/api/modpack/{modpack_id}"
 
         try:
             main_response = requests.get(
@@ -373,7 +389,7 @@ def get_modpack_minecraft_version(provider, modpack_id):
         except:
             print("This modpack does not exist on Technic Solder. Attempting to get version from main API instead...")
             try:
-                fallback_url = f'https://api.technicpack.net/modpack/{modpack_id}?build=729'
+                fallback_url = f'https://api.technicpack.net/modpack/{modpack_id}?build={latest_build}'
                 fallback_response = requests.get(
                     fallback_url, timeout=10, headers=HEADERS).json()
                 game_version = fallback_response["minecraft"]
