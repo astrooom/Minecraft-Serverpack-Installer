@@ -170,8 +170,9 @@ elif not modpack_urls["LatestReleaseServerpack"] and not modpack_urls["LatestBet
     print("Downloading Latest Non-Serverpack of", modpack_name + "...")
     filename = download(modpack_urls["LatestReleaseNonServerpack"])
 
-# For Modrinth modpacks.
 file_ext = pathlib.Path(filename).suffix
+
+# For Modrinth modpacks.
 if file_ext == '.mrpack':
     print("Detected modpack with .mrpack extension. Renaming to .zip...")
     move(filename, filename.replace('.mrpack', '.zip'))
@@ -265,7 +266,9 @@ else:
         for name in glob.glob(this_dir + "/" + folder_name + "/" + "*.json"):
             os.chdir(f"{this_dir}/{folder_name}")
             grab_modrinth_serverjars(name)
-            os.mkdir(f"{this_dir}/{folder_name}/mods")
+            mods_folder_exists = os.path.exists(f"{this_dir}/{folder_name}/mods")
+            if not mods_folder_exists:
+                os.mkdir(f"{this_dir}/{folder_name}/mods")
             os.chdir(f"{this_dir}/{folder_name}/mods")
             download_modrinth_mods(name)
             os.chdir(f"{this_dir}/{folder_name}")
@@ -500,7 +503,7 @@ else:
                         print(
                             "No manifest.json was found. Checking for it with normal downloadurl link...")
                         filename = download(modpack_normal_downloadurl)
-                        temp_folder = unzip(filename, "manifest_check")
+                        temp_folder = unzip(filename, "manifest_check", file_ext)
                         for name in glob.glob(glob.escape(this_dir + "/" + temp_folder + "/") + "manifest.json"):
                             if name:
                                 print(

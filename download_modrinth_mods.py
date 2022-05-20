@@ -89,7 +89,6 @@ def grab_modrinth_serverjars(path):
                 except:
                     pass
 
-
             if key == "forge":
                 forge_version = value
                 print(f"Found Forge version {forge_version}. Prepairing to download and install this Forge server jar...")
