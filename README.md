@@ -29,7 +29,7 @@ python run.py ```-provider PROVIDER``` ```-modpack-id MODPACK-ID``` ```[--modpac
 
 ## Arguments
 #### provider
-Provider sets from where to fetch the modpack. Available modes are ```curse``` for Curseforge, ```technic``` for Technicpack, ```ftb``` for Feed The Beast and ```direct``` for a direct download link (url) to a modpack (can be from any site).
+Provider sets from where to fetch the modpack. Available modes are ```curse``` for Curseforge, ```technic``` for Technicpack, ```ftb``` for Feed The Beast, ```modrinth``` for Modrinth, and ```direct``` for a direct download link (url) to a modpack (can be from any site).
 #### modpack-id
 If provider is set to ```curse``` this should be the modpacks project ID found on <a href="https://www.curseforge.com/minecraft/modpacks">the Curseforge website</a> in the top right "About Project" section of your desired modpack.
 
@@ -37,9 +37,11 @@ If provider is set to ```technic```, this should be the modpack slug found for e
 
 If provider is set to ```ftb```, this should be the modpack ID found on <a href="https://feed-the-beast.com/modpack"> the Feed The Beast website</a>. In the first part of the url for each modpack there is a numerical ID. For example, The Direwolf20 1.16 modpack's link is https://feed-the-beast.com/modpack/79_ftb_presents_direwolf20_1_16. This modpacks' ID is therefore 79.
 
+If provider is set to ```modrinth```, this should be the modpack project ID OR the modpack slug found on <a href="https://modrinth.com/modpack"> the Modrinth website</a>. On each modpack page, the project ID is found on the bottom-left under "Technical information". The modpack slug is found in the URL after /modpack. Example: https://modrinth.com/modpack/mechanic-craft/ - the slug here is mechanic-craft.
+
 If provider is set to ```direct```, this should be a direct download link (url), from where to fetch the modpack.
 #### modpack-version (optional)
-Which version of the modpack to install. Specify a version from the modpacks name. For example, <a href="https://www.curseforge.com/minecraft/modpacks/rlcraft">RLCraft</a> names their releases like "v.2.9", "v.2.8.2" etc. (as you can see by going to the "Files" section). Here, you can use "v.2.8.2" to pull that version. You can also use an exact version ID from Curseforge found in the URL of the specific pack version. For Technic, versions are labeled as "builds" instead of versions. For FTB, the version is found as an ID using the modpacks.ch api with the modpack ID. Example: https://api.modpacks.ch/public/modpack/79 for Direwolf20 1.16. This option is not available if provider is set to ```direct```. If left unspecified, the installer will fetch the latest recommended version of the modpack.
+Which version of the modpack to install. Specify a version from the modpacks name. For example, <a href="https://www.curseforge.com/minecraft/modpacks/rlcraft">RLCraft</a> names their releases like "v.2.9", "v.2.8.2" etc. (as you can see by going to the "Files" section). Here, you can use "v.2.8.2" to pull that version. You can also use an exact version ID from Curseforge found in the URL of the specific pack version. For Technic, versions are labeled as "builds" instead of versions. For FTB, the version is found as an ID using the modpacks.ch api with the modpack ID. Example: https://api.modpacks.ch/public/modpack/79 for Direwolf20 1.16. For Modrinth, the modpack version is found using the Modrinth API labeled as "id". This option is not available if provider is set to ```direct```. If left unspecified, the installer will fetch the latest recommended version of the modpack.
 
 In conjunction with Curseforges' release type system, if no "recommended" version exists, it will pull the latest "beta" serverpack. If no "beta" version exists it will pull the latest "alpha" serverpack. If the modpack has no provided serverpack at all it will pull the latest non-serverpack in the same order. For technic, all modpacks have a recommended version.
 #### clean-scripts (optional)
