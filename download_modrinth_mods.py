@@ -22,6 +22,10 @@ def download_modrinth_mods(path):
                         print(
                             f"Detected unsupported server mod {mod_filename}. Skipping download.")
                         continue
+                    elif mod['env']['server'] == "optional":
+                        print(
+                            f"Detected optional server mod {mod_filename}. Skipping download.")
+                        continue
             if mod['downloads']:
                 download(mod['downloads'][0])
 
