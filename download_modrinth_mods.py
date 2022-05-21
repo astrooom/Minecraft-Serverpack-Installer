@@ -16,6 +16,8 @@ def download_modrinth_mods(path):
                 mod_filename = os.path.basename(mod['path'])
             except:
                 mod_filename = "Undefined Name"
+            if "betterchat" in mod_filename.lower(): # This mod causes issues on servers
+                continue
             if mod['env']:
                 if mod['env']['server']:
                     if mod['env']['server'] == "unsupported":
