@@ -8,7 +8,7 @@ from shutil import move, rmtree, copy
 from get_modpack_info import get_server_modpack_url, get_modpack_minecraft_version
 from get_forge_or_fabric_version import get_forge_or_fabric_version_from_manifest
 from download_modrinth_mods import download_modrinth_mods, move_modrinth_overrides, grab_modrinth_serverjars
-from download_file import download
+from download_file import download, download_wget
 from ptero_api_func import update_startup
 from unzip_modpack import unzip
 from serverstarter_func import change_installpath
@@ -86,6 +86,7 @@ print("Received arguments to download modpack with ID", modpack_id, "from provid
 
 # Checks OS to know which install file to execute (.bat or .sh)
 operating_system = platform.system()
+print("Detected OS", operating_system)
 
 this_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -148,27 +149,42 @@ else:
     print("Modpack info not provided. Exiting.")
     sys.exit()
 
-print(modpack_urls)
+# print(modpack_urls)
 # Grab URLs to modpack and download
 if (modpack_urls["SpecifiedVersion"]):
     print("Downloading Specified Version of", modpack_name + "...")
-    filename = download(modpack_urls["SpecifiedVersion"])
+    if provider == "ftb":
+        filename = download_wget(modpack_urls["SpecifiedVersion"])
+    else:
+        filename = download(modpack_urls["SpecifiedVersion"])
 
 elif (modpack_urls["LatestReleaseServerpack"]):
     print("Downloading Latest Release of", modpack_name + "...")
-    filename = download(modpack_urls["LatestReleaseServerpack"])
+    if provider == "ftb":
+        filename = download_wget(modpack_urls["LatestReleaseServerpack"])
+    else:
+        filename = download(modpack_urls["LatestReleaseServerpack"])
 
 elif not modpack_urls["LatestReleaseServerpack"] and modpack_urls["LatestBetaServerpack"]:
     print("Downloading Latest Beta of", modpack_name + "...")
-    filename = download(modpack_urls["LatestBetaServerpack"])
+    if provider == "ftb":
+        filename = download_wget(modpack_urls["LatestBetaServerpack"])
+    else:
+        filename = download(modpack_urls["LatestBetaServerpack"])
 
 elif not modpack_urls["LatestReleaseServerpack"] and not modpack_urls["LatestBetaServerpack"] and modpack_urls["LatestAlphaServerpack"]:
     print("Downloading Latest Alpha of", modpack_name + "...")
-    filename = download(modpack_urls["LatestAlphaServerpack"])
+    if provider == "ftb":
+        filename = download_wget(modpack_urls["LatestAlphaServerpack"])
+    else:
+        filename = download(modpack_urls["LatestAlphaServerpack"])
 
 elif not modpack_urls["LatestReleaseServerpack"] and not modpack_urls["LatestBetaServerpack"] and not modpack_urls["LatestAlphaServerpack"] and modpack_urls["LatestReleaseNonServerpack"]:
     print("Downloading Latest Non-Serverpack of", modpack_name + "...")
-    filename = download(modpack_urls["LatestReleaseNonServerpack"])
+    if provider == "ftb":
+        filename = download_wget(modpack_urls["LatestReleaseNonServerpack"])
+    else:
+        filename = download(modpack_urls["LatestReleaseNonServerpack"])
 
 file_ext = pathlib.Path(filename).suffix
 

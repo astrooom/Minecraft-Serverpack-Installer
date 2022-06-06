@@ -6,3 +6,4 @@ python_dateutil==2.8.2
 oschmod
 pyyaml
 py-dactyl
+wget==3.2

@@ -1,6 +1,7 @@
 import sys
 import requests
 from tqdm import tqdm
+import wget
 
 HEADERS = {'user-agent': ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'),}
 
@@ -12,19 +13,16 @@ def bar_progress(current, total, width=80):
     sys.stdout.flush()
 
 
-# def download(url):
-    #final_url = requests.head(url, allow_redirects=True).url
+def download_wget(url):
+    final_url = requests.head(url, allow_redirects=True).url
 
-    #filename = (final_url.split('/')[-1])
+    filename = (final_url.split('/')[-1])
 
-    # download_filename = wget.download(url, bar=bar_progress)
+    download_filename = wget.download(url, bar=bar_progress)
 
-    # print("\nFinished downloading", download_filename)
+    print("\nFinished downloading", download_filename)
 
-    # return download_filename
-
-    # download('https://edge.forgecdn.net/files/3012/800/SkyFactory-4_Server_4.2.2.zip')
-
+    return download_filename
 
 def download(url):
     file_name_start_pos = url.rfind("/") + 1
