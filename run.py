@@ -149,6 +149,8 @@ else:
     print("Modpack info not provided. Exiting.")
     sys.exit()
 
+print(modpack_info)
+
 # print(modpack_urls)
 # Grab URLs to modpack and download
 if (modpack_urls["SpecifiedVersion"]):
@@ -193,6 +195,13 @@ if file_ext == '.mrpack':
     print("Detected modpack with .mrpack extension. Renaming to .zip...")
     move(filename, filename.replace('.mrpack', '.zip'))
     filename = filename.replace('.mrpack', '.zip')
+
+if "?" in file_ext:
+    new_file_ext = file_ext.partition(".zip")[1]
+    new_filename = filename.replace(file_ext, new_file_ext)
+    print("Renaming", filename, "to", new_filename)
+    move(filename, new_filename)
+    filename = new_filename
 
 sleep(2)
 
@@ -504,6 +513,7 @@ else:
             #     print("Found old server.jar.")
             #     os.remove(sever_jar_path)
 
+            modpack_jar_type = None
             if not server_jar_found:
                 manifest_file_found = False
                 print("No forge or fabric file found. Checking for manifest.json...")
@@ -522,6 +532,12 @@ else:
                         print(
                             "No manifest.json was found. Checking for it with normal downloadurl link...")
                         filename = download(modpack_normal_downloadurl)
+                        if "?" in filename:
+                            new_file_ext = file_ext.partition(".zip")[1]
+                            new_filename = filename.replace(file_ext, new_file_ext)
+                            print("Renaming", filename, "to", new_filename)
+                            move(filename, new_filename)
+                            filename = new_filename
                         temp_folder = unzip(filename, "manifest_check", file_ext)
                         for name in glob.glob(glob.escape(this_dir + "/" + temp_folder + "/") + "manifest.json"):
                             if name:
@@ -534,65 +550,66 @@ else:
                                 delete_tree_directory(this_dir + "/" + temp_folder)
                                 print("Deleted temp folder")
 
-                if modpack_jar_type == "forge":
-                    if "1.12.2-14.23.5" in modpack_jar_version:
-                        print(
-                            "Found outdated and broken version of forge 1.12.2. Downloading latest for 1.12.2 instead.")
-                        forge_installer_url = 'https://maven.minecraftforge.net/net/minecraftforge/forge/1.12.2-14.23.5.2860/forge-1.12.2-14.23.5.2860-installer.jar'
-                    else:
-                        forge_installer_url = f'https://files.minecraftforge.net/maven/net/minecraftforge/forge/{modpack_jar_version}/forge-{modpack_jar_version}-installer.jar'
-                    os.chdir(f"{this_dir}/{folder_name}")
-                    filename = download(forge_installer_url)
-                    for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + filename):
-                        if name:
-                            print("Changing Directory to not-included forge installer")
-                            os.chdir(f"{this_dir}/{folder_name}")
+                if modpack_jar_type:
+                    if modpack_jar_type == "forge":
+                        if "1.12.2-14.23.5" in modpack_jar_version:
                             print(
-                                "Running Forge Installer. This may take a minute or two...")
-                            os.system(f'java -jar "{name}" --installServer')
-                            print("Finished running forge installer")
-                            os.remove(name)
-                            print("Removed forge installer")
-                            try:
-                                os.remove(name + ".log")
-                                print("Removed forge installer log")
-                            except:
-                                pass
-                if modpack_jar_type == "fabric":
-                    # ! Will manually have to be changed as there is no hosted link to always get the latest fabric loader
-                    fabric_installer_url = 'https://maven.fabricmc.net/net/fabricmc/fabric-installer/0.10.2/fabric-installer-0.10.2.jar'
-                    os.chdir(f"{this_dir}/{folder_name}")
-                    filename = download(fabric_installer_url)
-                    for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + filename):
-                        print(name)
-                        if name:
-                            print("Changing Directory to not-included fabric installer")
-                            os.chdir(f"{this_dir}/{folder_name}")
-                            print(
-                                "Running Fabric Loader. This may take a minute or two...")
-                            os.system(
-                                f'java -jar "{name}" server -mcversion {modpack_jar_version} -downloadMinecraft')
-                            print("Finished running Fabric Loader")
-                            os.remove(name)
-                            print("Removed Fabric Loader jar")
-                            try:
-                                move("server.jar", "vanilla.jar")
-                                print("Renamed server.jar to vanilla.jar")
-                            except:
-                                pass
-                            try:
-                                move("fabric-server-launch.jar", "server.jar")
-                                renamed_serverjar = True
-                                print("Renamed fabric-server-launch.jar to server.jar")
-                            except:
-                                pass
-                            try:
-                                os.system(
-                                    'echo serverJar=vanilla.jar > fabric-server-launcher.properties')
+                                "Found outdated and broken version of forge 1.12.2. Downloading latest for 1.12.2 instead.")
+                            forge_installer_url = 'https://maven.minecraftforge.net/net/minecraftforge/forge/1.12.2-14.23.5.2860/forge-1.12.2-14.23.5.2860-installer.jar'
+                        else:
+                            forge_installer_url = f'https://files.minecraftforge.net/maven/net/minecraftforge/forge/{modpack_jar_version}/forge-{modpack_jar_version}-installer.jar'
+                        os.chdir(f"{this_dir}/{folder_name}")
+                        filename = download(forge_installer_url)
+                        for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + filename):
+                            if name:
+                                print("Changing Directory to not-included forge installer")
+                                os.chdir(f"{this_dir}/{folder_name}")
                                 print(
-                                    "Changed fabric-server-launcher jar to renamed vanilla.jar")
-                            except:
-                                pass
+                                    "Running Forge Installer. This may take a minute or two...")
+                                os.system(f'java -jar "{name}" --installServer')
+                                print("Finished running forge installer")
+                                os.remove(name)
+                                print("Removed forge installer")
+                                try:
+                                    os.remove(name + ".log")
+                                    print("Removed forge installer log")
+                                except:
+                                    pass
+                    elif modpack_jar_type == "fabric":
+                        # ! Will manually have to be changed as there is no hosted link to always get the latest fabric loader
+                        fabric_installer_url = 'https://maven.fabricmc.net/net/fabricmc/fabric-installer/0.10.2/fabric-installer-0.10.2.jar'
+                        os.chdir(f"{this_dir}/{folder_name}")
+                        filename = download(fabric_installer_url)
+                        for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + filename):
+                            print(name)
+                            if name:
+                                print("Changing Directory to not-included fabric installer")
+                                os.chdir(f"{this_dir}/{folder_name}")
+                                print(
+                                    "Running Fabric Loader. This may take a minute or two...")
+                                os.system(
+                                    f'java -jar "{name}" server -mcversion {modpack_jar_version} -downloadMinecraft')
+                                print("Finished running Fabric Loader")
+                                os.remove(name)
+                                print("Removed Fabric Loader jar")
+                                try:
+                                    move("server.jar", "vanilla.jar")
+                                    print("Renamed server.jar to vanilla.jar")
+                                except:
+                                    pass
+                                try:
+                                    move("fabric-server-launch.jar", "server.jar")
+                                    renamed_serverjar = True
+                                    print("Renamed fabric-server-launch.jar to server.jar")
+                                except:
+                                    pass
+                                try:
+                                    os.system(
+                                        'echo serverJar=vanilla.jar > fabric-server-launcher.properties')
+                                    print(
+                                        "Changed fabric-server-launcher jar to renamed vanilla.jar")
+                                except:
+                                    pass
 
 
 # Garbage files cleanup

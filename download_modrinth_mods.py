@@ -62,7 +62,7 @@ def grab_modrinth_serverjars(path):
                     'user-agent': ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'), }
 
                 launchermeta_response = requests.get(
-                    launchermeta_url, timeout=10, headers=HEADERS).json()
+                    launchermeta_url, timeout=60, headers=HEADERS).json()
                 for version in launchermeta_response['versions']:
                     if version['id'] == minecraft_version:
                         print(
@@ -70,7 +70,7 @@ def grab_modrinth_serverjars(path):
                         launchermeta_specifiedversion_url = version["url"]
 
                         launchermeta_specifiedversion_response = requests.get(
-                            launchermeta_specifiedversion_url, timeout=10, headers=HEADERS).json()
+                            launchermeta_specifiedversion_url, timeout=60, headers=HEADERS).json()
 
                         minecraft_version_downloads = launchermeta_specifiedversion_response[
                             "downloads"]
