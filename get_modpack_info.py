@@ -326,7 +326,7 @@ def get_server_modpack_url(provider, modpack_id, modpack_version, operating_syst
         if modpack_version and modpack_version != "latest":
             for version in response["versions"]:
                 if str(version["id"]) == str(modpack_version):
-                    if "arm" in architecture.lower() and operating_system.lower() == "linux":
+                    if ("arm" in architecture.lower() or "aarch" in architecture.lower()) and operating_system.lower() == "linux":
                         serverbinary_url = f"https://api.modpacks.ch/public/modpack/{modpack_id}/{modpack_version}/server/arm/{operating_system.lower()}"
                     else:
                         serverbinary_url = f"https://api.modpacks.ch/public/modpack/{modpack_id}/{modpack_version}/server/{operating_system.lower()}"
