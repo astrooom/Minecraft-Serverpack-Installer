@@ -87,6 +87,8 @@ print("Received arguments to download modpack with ID", modpack_id, "from provid
 # Checks OS to know which install file to execute (.bat or .sh)
 operating_system = platform.system()
 print("Detected OS", operating_system)
+architecture = platform.machine()
+print("Detected Architecture", architecture)
 
 this_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -140,7 +142,7 @@ def kill(proc_pid):
 
 
 modpack_info = get_server_modpack_url(
-    provider, modpack_id, modpack_version, operating_system)
+    provider, modpack_id, modpack_version, operating_system, architecture)
 if modpack_info:
     modpack_name = modpack_info[0]
     modpack_urls = modpack_info[1]

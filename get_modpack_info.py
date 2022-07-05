@@ -13,7 +13,7 @@ def contains_number(value):
 
 #modpack_id = 381671
 
-def get_server_modpack_url(provider, modpack_id, modpack_version, operating_system):
+def get_server_modpack_url(provider, modpack_id, modpack_version, operating_system, architecture):
 
     if provider == "curse":
 
@@ -326,7 +326,10 @@ def get_server_modpack_url(provider, modpack_id, modpack_version, operating_syst
         if modpack_version and modpack_version != "latest":
             for version in response["versions"]:
                 if str(version["id"]) == str(modpack_version):
-                    serverbinary_url = f"https://api.modpacks.ch/public/modpack/{modpack_id}/{modpack_version}/server/{operating_system.lower()}"
+                    if "arm" in architecture.lower() and operating_system.lower() == "linux":
+                        serverbinary_url = f"https://api.modpacks.ch/public/modpack/{modpack_id}/{modpack_version}/server/arm/{operating_system.lower()}"
+                    else:
+                        serverbinary_url = f"https://api.modpacks.ch/public/modpack/{modpack_id}/{modpack_version}/server/{operating_system.lower()}"
 
             urls = {"SpecifiedVersion": serverbinary_url, "LatestReleaseServerpack": "",
                     "LatestBetaServerpack": "", "LatestAlphaServerpack": "", "LatestReleaseNonServerpack": ""}
