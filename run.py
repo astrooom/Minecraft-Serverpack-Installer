@@ -20,6 +20,7 @@ import sys
 import argparse
 import json
 import time
+import wget
 
 parser = argparse.ArgumentParser(
     description="Set options for modpack installer.")
@@ -504,7 +505,8 @@ else:
                             dl_url = dl_data["downloadUrl"]
                             if dl_url != None:
                                 print(f'''Downloading mod: {dl_data["displayName"]}''')
-                                os.system(f'''wget {dl_url} -x -P {this_dir}/{folder_name}/mods/''')
+                                outdir = f"{this_dir}/{folder_name}/mods/"
+                                wget.download(dl_url,out=outdir, bar=bar_progress)
                             else:
                                 print(f'''Issues downloading mod: {dl_data["displayName"]}''')
                         time.sleep(1)
