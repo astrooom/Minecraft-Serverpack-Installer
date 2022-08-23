@@ -495,8 +495,15 @@ else:
                 if name:
                     manifest_installer = True
                     print("Running manifest installer...")
-                    os.system(
-                        f'''java -jar "{this_dir}/ModpackDownloader-cli-0.7.2.jar" -manifest "{this_dir}/{folder_name}/manifest.json" -folder "{this_dir}/{folder_name}/mods"''')
+                    manifest = json.load(open(f"{this_dir}/{folder_name}/manifest.json"))
+                    for file in manifest["files"]:
+                        if file["required"] == True:
+                            dl_url = get_mod_download_url(file["projectID"],file["fileID"])
+                            if dl_url != None:
+                                os.system(f'''wget {dl_url} -P {this_dir}/{folder_name}/mods/''')
+                            else:
+                                print(f'''Issues downloading mod: {file["displayName"]}''')
+                        time.sleep(1)
 
         # If there was no included forge/fabric or serverstarter installer, as well as no manifest.json provided in the serverpack, look for existing forge or fabric server jar. If they don't exist, get the manifest file and download the correct forge/fabric version and install it.
         server_jar_found = False
