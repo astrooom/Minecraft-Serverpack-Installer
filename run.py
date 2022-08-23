@@ -18,6 +18,7 @@ import pathlib
 import platform
 import sys
 import argparse
+import json
 
 parser = argparse.ArgumentParser(
     description="Set options for modpack installer.")
