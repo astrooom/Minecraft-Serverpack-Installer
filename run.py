@@ -504,11 +504,10 @@ else:
                             dl_url = dl_data["downloadUrl"]
                             if dl_url != None:
                                 print(f'''Downloading mod: {dl_data["displayName"]}''')
-                                outdir = f"{this_dir}/{folder_name}/mods/"
+                                outdir = f"./mods/"
                                 download_wget(dl_url,outdir)
                             else:
                                 print(f'''Issues downloading mod: {dl_data["displayName"]}''')
-                        time.sleep(1)
 
         # If there was no included forge/fabric or serverstarter installer, as well as no manifest.json provided in the serverpack, look for existing forge or fabric server jar. If they don't exist, get the manifest file and download the correct forge/fabric version and install it.
         server_jar_found = False
