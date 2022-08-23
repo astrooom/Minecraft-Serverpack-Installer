@@ -19,7 +19,7 @@ import platform
 import sys
 import argparse
 import json
-import time
+from tqdm import tqdm
 
 parser = argparse.ArgumentParser(
     description="Set options for modpack installer.")
@@ -498,7 +498,7 @@ else:
                     manifest_installer = True
                     print("Running manifest installer...")
                     manifest = json.load(open(f"{this_dir}/{folder_name}/manifest.json"))
-                    for file in manifest["files"]:
+                    for file in tqdm(manifest["files"]):
                         if file["required"] == True:
                             dl_data = get_mod_download_url(file["projectID"],file["fileID"])
                             dl_url = dl_data["downloadUrl"]
