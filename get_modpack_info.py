@@ -146,7 +146,10 @@ def get_server_modpack_url(provider, modpack_id, modpack_version, operating_syst
 
                     normal_downloadurl = version["downloadUrl"]
 
-                    server_pack_id = version["serverPackFileId"]
+                    try:
+                        server_pack_id = version["serverPackFileId"]
+                    except:
+                        server_pack_id = 'someRandomValueBecauseSomeModpackVersionsDontHaveAServerPackId'
 
                     if (len(str(modpack_version)) > 2) and (modpack_version) in str(display_name):
                         try:
@@ -178,7 +181,10 @@ def get_server_modpack_url(provider, modpack_id, modpack_version, operating_syst
 
             normal_downloadurl = version["downloadUrl"]
 
-            server_pack_id = version["serverPackFileId"]
+            try:
+                server_pack_id = version["serverPackFileId"]
+            except:
+                server_pack_id = 'someRandomValueBecauseSomeModpackVersionsDontHaveAServerPackId'
 
             if (release_type == 1) and (date_obj > newest_date_release):
                 newest_date_release = date_obj
