@@ -12,12 +12,14 @@ def bar_progress(current, total, width=80):
     sys.stdout.flush()
 
 
-def download_wget(url):
+def download_wget(url, outdir=None):
     final_url = requests.head(url, allow_redirects=True).url
 
     # filename = (final_url.split('/')[-1])
-
-    download_filename = wget.download(url, bar=bar_progress)
+    if outdir == None:
+        download_filename = wget.download(url, bar=bar_progress)
+    else:
+        download_filename = wget.download(url, bar=bar_progress)
 
     print("\nFinished downloading", download_filename)
 
