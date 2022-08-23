@@ -504,8 +504,7 @@ else:
                             dl_url = dl_data["downloadUrl"]
                             if dl_url != None:
                                 print(f'''Downloading mod: {dl_data["displayName"]}''')
-                                outdir = f"./mods/"
-                                download_wget(dl_url,outdir)
+                                download_wget(dl_url,"mods")
                             else:
                                 print(f'''Issues downloading mod: {dl_data["displayName"]}''')
 
