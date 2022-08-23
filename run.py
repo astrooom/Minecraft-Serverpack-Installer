@@ -5,7 +5,7 @@ import subprocess
 from time import sleep
 import glob
 from shutil import move, rmtree, copy
-from get_modpack_info import get_server_modpack_url, get_modpack_minecraft_version
+from get_modpack_info import get_server_modpack_url, get_modpack_minecraft_version, get_mod_download_url
 from get_forge_or_fabric_version import get_forge_or_fabric_version_from_manifest
 from download_modrinth_mods import download_modrinth_mods, move_modrinth_overrides, grab_modrinth_serverjars
 from download_file import download, download_wget
