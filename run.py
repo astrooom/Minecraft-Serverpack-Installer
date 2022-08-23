@@ -19,6 +19,7 @@ import platform
 import sys
 import argparse
 import json
+import time
 
 parser = argparse.ArgumentParser(
     description="Set options for modpack installer.")
@@ -499,11 +500,13 @@ else:
                     manifest = json.load(open(f"{this_dir}/{folder_name}/manifest.json"))
                     for file in manifest["files"]:
                         if file["required"] == True:
-                            dl_url = get_mod_download_url(file["projectID"],file["fileID"])
+                            dl_data = get_mod_download_url(file["projectID"],file["fileID"])
+                            dl_url = dl_data["downloadUrl"]
                             if dl_url != None:
-                                os.system(f'''wget {dl_url} -P {this_dir}/{folder_name}/mods/''')
+                                print(f'''Downloading mod: {dl_data["displayName"]}''')
+                                os.system(f'''wget {dl_url} -x -P {this_dir}/{folder_name}/mods/''')
                             else:
-                                print(f'''Issues downloading mod: {file["displayName"]}''')
+                                print(f'''Issues downloading mod: {dl_data["displayName"]}''')
                         time.sleep(1)
 
         # If there was no included forge/fabric or serverstarter installer, as well as no manifest.json provided in the serverpack, look for existing forge or fabric server jar. If they don't exist, get the manifest file and download the correct forge/fabric version and install it.
