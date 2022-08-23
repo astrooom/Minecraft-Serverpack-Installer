@@ -19,7 +19,7 @@ def download_wget(url, outdir=None):
     if outdir == None:
         download_filename = wget.download(url, bar=bar_progress)
     else:
-        download_filename = wget.download(url, bar=bar_progress)
+        download_filename = wget.download(url, out=outdir, bar=bar_progress)
 
     print("\nFinished downloading", download_filename)
 
