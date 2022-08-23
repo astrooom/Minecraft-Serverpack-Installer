@@ -552,4 +552,4 @@ def get_mod_download_url(mod_id, version_id):
                    'x-api-key': '$2a$10$Ynz1tT6cTV7vz1OUBS.lgOHanAXskT7KqCq6jXyRSGgk9DPA9mjEG',
                    }
     response = requests.get(url, timeout=60, headers=HEADERS).json()["data"]
-    return(response["downloadUrl"])
+    return(response)
