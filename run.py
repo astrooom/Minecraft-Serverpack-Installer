@@ -82,7 +82,7 @@ elif provider == "direct":
 print("Installer running in", mode, "mode.")
 print("Fetching modpack from", provider + ".")
 print("Received arguments to download modpack with ID", modpack_id, "from provider",
-      provider, "with version", modpack_version, "using minecraft version", minecraft_version)
+        provider, "with version", modpack_version, "using minecraft version", minecraft_version)
 
 # Checks OS to know which install file to execute (.bat or .sh)
 operating_system = platform.system()
@@ -275,7 +275,7 @@ else:
         for mods in glob.glob(glob.escape(this_dir + "/") + "mods"):
             print("Found and deleting old mods folder", mods, ". Deleting")
             delete_tree_directory(mods)
-        for coremods in glob.glob(glob.escape(this_dir  + "/") + "coremods"):
+        for coremods in glob.glob(glob.escape(this_dir + "/") + "coremods"):
             print("Found and deleting old coremods folder",
                   coremods, ". Deleting")
             delete_tree_directory(coremods)
@@ -293,7 +293,8 @@ else:
         for name in glob.glob(this_dir + "/" + folder_name + "/" + "modrinth.index.json"):
             os.chdir(f"{this_dir}/{folder_name}")
             grab_modrinth_serverjars(name)
-            mods_folder_exists = os.path.exists(f"{this_dir}/{folder_name}/mods")
+            mods_folder_exists = os.path.exists(
+                f"{this_dir}/{folder_name}/mods")
             if not mods_folder_exists:
                 os.mkdir(f"{this_dir}/{folder_name}/mods")
 
@@ -307,7 +308,8 @@ else:
         if do_override == True:
             move_modrinth_overrides(f"{this_dir}/{folder_name}")
             os.chdir(f"{this_dir}/{folder_name}")
-            delete_tree_directory(this_dir + "/" + folder_name + "/" + "overrides")
+            delete_tree_directory(
+                this_dir + "/" + folder_name + "/" + "overrides")
     else:
         # Check if forge installer exists in serverpack dir. If does, run it.
         forge_installer = False
@@ -447,7 +449,7 @@ else:
             except:
                 pass
 
-        #Check if mods.csv file is found. If so, run its install script.
+        # Check if mods.csv file is found. If so, run its install script.
         mods_csv_installer = False
         if not forge_installer and not serverstarter_installer:
             for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "*.csv"):
@@ -465,14 +467,16 @@ else:
                         os.system(f"chmod +x {file}")
                     print("Changing Directory for mods.csv installer")
                     os.chdir(f"{this_dir}/{folder_name}")
-                    print("Running mods.csv installer. This may take a minute or two...")
+                    print(
+                        "Running mods.csv installer. This may take a minute or two...")
                     p = subprocess.Popen(f"{file}", stdin=subprocess.PIPE,
-                                        stdout=subprocess.PIPE, shell=True)
+                                         stdout=subprocess.PIPE, shell=True)
                     p.communicate(input=b"\n")
                     try:
                         p.wait(timeout=15)
                     except subprocess.TimeoutExpired:
-                        print("Timeout reached for mods.csv installer subprocess. Killing.")
+                        print(
+                            "Timeout reached for mods.csv installer subprocess. Killing.")
                         kill(p.pid)
                     print("Removing mods.csv server installer")
                     os.remove(file)
@@ -536,11 +540,13 @@ else:
                         filename = download(modpack_normal_downloadurl)
                         if "?" in filename:
                             new_file_ext = file_ext.partition(".zip")[1]
-                            new_filename = filename.replace(file_ext, new_file_ext)
+                            new_filename = filename.replace(
+                                file_ext, new_file_ext)
                             print("Renaming", filename, "to", new_filename)
                             move(filename, new_filename)
                             filename = new_filename
-                        temp_folder = unzip(filename, "manifest_check", file_ext)
+                        temp_folder = unzip(
+                            filename, "manifest_check", file_ext)
                         for name in glob.glob(glob.escape(this_dir + "/" + temp_folder + "/") + "manifest.json"):
                             if name:
                                 print(
@@ -549,7 +555,8 @@ else:
                                     name)
                                 modpack_jar_type = grabbed_manifest_version[0]
                                 modpack_jar_version = grabbed_manifest_version[1]
-                                delete_tree_directory(this_dir + "/" + temp_folder)
+                                delete_tree_directory(
+                                    this_dir + "/" + temp_folder)
                                 print("Deleted temp folder")
 
                 if modpack_jar_type:
@@ -564,11 +571,13 @@ else:
                         filename = download(forge_installer_url)
                         for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + filename):
                             if name:
-                                print("Changing Directory to not-included forge installer")
+                                print(
+                                    "Changing Directory to not-included forge installer")
                                 os.chdir(f"{this_dir}/{folder_name}")
                                 print(
                                     "Running Forge Installer. This may take a minute or two...")
-                                os.system(f'java -jar "{name}" --installServer')
+                                os.system(
+                                    f'java -jar "{name}" --installServer')
                                 print("Finished running forge installer")
                                 os.remove(name)
                                 print("Removed forge installer")
@@ -585,7 +594,8 @@ else:
                         for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + filename):
                             print(name)
                             if name:
-                                print("Changing Directory to not-included fabric installer")
+                                print(
+                                    "Changing Directory to not-included fabric installer")
                                 os.chdir(f"{this_dir}/{folder_name}")
                                 print(
                                     "Running Fabric Loader. This may take a minute or two...")
@@ -602,7 +612,8 @@ else:
                                 try:
                                     move("fabric-server-launch.jar", "server.jar")
                                     renamed_serverjar = True
-                                    print("Renamed fabric-server-launch.jar to server.jar")
+                                    print(
+                                        "Renamed fabric-server-launch.jar to server.jar")
                                 except:
                                     pass
                                 try:
@@ -649,8 +660,7 @@ for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "overrid
         delete_tree_directory(name)
 
 
-
-# If set to true, script will delete provided server startup script (.sh for linux and .bat for Windows).
+# If set to true, script will delete provided server startup script (.sh for linux and .bat or .ps1 for Windows).
 if clean_startup_script:
     print("Clean startup scripts enabled.")
     for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "*.sh"):
@@ -658,6 +668,10 @@ if clean_startup_script:
             print("Removing", name)
             os.remove(name)
     for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "*.bat"):
+        if name:
+            print("Removing", name)
+            os.remove(name)
+    for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "*.ps1"):
         if name:
             print("Removing", name)
             os.remove(name)
