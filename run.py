@@ -37,6 +37,8 @@ parser.add_argument("--pterodactyl", default="normal", action="store_true")
 parser.add_argument("--clean-scripts", default=False, action="store_true")
 # If to remove the /mods, /.fabric and /libraries folders before installing the modpack. This should be set if updating a modpack and not set if it's a first-time install.
 parser.add_argument("--update", default=False, action="store_true")
+# Set predefined name of output folder (does not work with pterodactly mode)
+parser.add_argument("--output", default=False, type=str, action="store")
 
 # If running --pterodactyl, you must provide these args
 # Used to get the UUID of the currently installing server.
@@ -55,7 +57,7 @@ mode = args.pterodactyl
 if mode == True:
     mode = "pterodactyl"
 modpack_version = args.modpack_version
-
+output = args.output
 clean_startup_script = args.clean_scripts
 remove_old_files = args.update
 
@@ -213,7 +215,10 @@ if provider == "ftb":
     if os.path.isdir(this_dir + "/" + modpack_name):
         delete_tree_directory(this_dir + "/" + modpack_name)
     os.mkdir(this_dir + "/" + modpack_name)
-    folder_name = modpack_name
+    if output:
+        folder_name = output
+    else:
+        folder_name = modpack_name
     move(filename, this_dir + "/" + modpack_name + "/" + filename)
     os.chdir(f"{this_dir}/{modpack_name}")
 
@@ -235,6 +240,10 @@ if provider == "ftb":
 else:
     print("Extracting downloaded modpack archive...")
     folder_name = unzip(filename, modpack_name, file_ext)
+
+    if output:
+        folder_name = output
+
     modpack_folder = os.listdir(join(this_dir, folder_name))
 
     # Count number of files
@@ -679,7 +688,7 @@ if clean_startup_script:
 #     if name:
 #         print("Removing", name)
 #         os.remove(name)
-print(this_dir + "/" + folder_name)
+
 for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "forge*.jar"):
     if name:
         print("Renaming", name, "to server.jar")
