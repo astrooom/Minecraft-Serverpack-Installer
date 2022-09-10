@@ -5,9 +5,12 @@ import shutil
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-def unzip(zip_name, modpack_name, file_ext):
+def unzip(zip_name, modpack_name, file_ext, output=False):
 
-    extract_dir = os.path.join(dir_path, modpack_name.replace(":", "_").replace(" ", "_").replace(",", ""))
+    if output:
+        extract_dir = os.path.join(dir_path, output)
+    else:
+        extract_dir = os.path.join(dir_path, modpack_name.replace(":", "_").replace(" ", "_").replace(",", ""))
     my_zip = os.path.join(dir_path, zip_name)
     shutil.unpack_archive(my_zip, extract_dir)
     print("Extraction Done, deleting zip")
