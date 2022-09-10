@@ -74,6 +74,7 @@ print("Detected Architecture", architecture)
 
 if working_path:
     this_dir = working_path
+    os.chdir(working_path)
 else:
     this_dir = os.path.dirname(os.path.realpath(__file__))
 
