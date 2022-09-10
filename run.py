@@ -36,7 +36,7 @@ parser.add_argument("--clean-scripts", default=False, action="store_true")
 # If to remove the /mods, /.fabric and /libraries folders before installing the modpack. This should be set if updating a modpack and not set if it's a first-time install.
 parser.add_argument("--update", default=False, action="store_true")
 # Set predefined name of output folder (does not work with pterodactly mode)
-parser.add_argument("--folder_name", default=False, type=str, action="store")
+parser.add_argument("--folder-name", default=False, type=str, action="store")
 parser.add_argument("--working-path", default=False, type=str, action="store")
 
 args = parser.parse_args()
