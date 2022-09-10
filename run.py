@@ -212,13 +212,13 @@ sleep(2)
 if provider == "ftb":
     modpack_name = modpack_name.replace(
         ":", "_").replace(" ", "_").replace(",", "")
-    if os.path.isdir(this_dir + "/" + modpack_name):
-        delete_tree_directory(this_dir + "/" + modpack_name)
-    os.mkdir(this_dir + "/" + modpack_name)
     if output:
         folder_name = output
     else:
         folder_name = modpack_name
+    if os.path.isdir(this_dir + "/" + folder_name):
+        delete_tree_directory(this_dir + "/" + folder_name)
+    os.mkdir(this_dir + "/" + folder_name)
     move(filename, this_dir + "/" + folder_name + "/" + filename)
     os.chdir(f"{this_dir}/{folder_name}")
 
