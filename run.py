@@ -9,10 +9,8 @@ from get_modpack_info import get_server_modpack_url, get_modpack_minecraft_versi
 from get_forge_or_fabric_version import get_forge_or_fabric_version_from_manifest
 from download_modrinth_mods import download_modrinth_mods, move_modrinth_overrides, grab_modrinth_serverjars
 from download_file import download, download_wget
-from ptero_api_func import update_startup
 from unzip_modpack import unzip
 from serverstarter_func import change_installpath
-from ptero_api_func import get_server_id
 import psutil
 import pathlib
 import platform
@@ -38,17 +36,9 @@ parser.add_argument("--clean-scripts", default=False, action="store_true")
 # If to remove the /mods, /.fabric and /libraries folders before installing the modpack. This should be set if updating a modpack and not set if it's a first-time install.
 parser.add_argument("--update", default=False, action="store_true")
 # Set predefined name of output folder (does not work with pterodactly mode)
-parser.add_argument("--output", default=False, type=str, action="store")
+parser.add_argument("--folder_name", default=False, type=str, action="store")
+parser.add_argument("--working-path", default=False, type=str, action="store")
 
-# If running --pterodactyl, you must provide these args
-# Used to get the UUID of the currently installing server.
-parser.add_argument("--modify-startup", default=False, action="store_true")
-# Used to get the UUID of the currently installing server.
-parser.add_argument("--server-uuid", default=False, action="store")
-# URL of Pterodactyl panel.
-parser.add_argument("--panel-url", default=False, action="store")
-# Application API Key for accessing Pterodactyl Panel application API endpoints.
-parser.add_argument("--application-api-key", default=False, action="store")
 args = parser.parse_args()
 
 provider = args.provider
@@ -57,20 +47,10 @@ mode = args.pterodactyl
 if mode == True:
     mode = "pterodactyl"
 modpack_version = args.modpack_version
-output = args.output
+output = args.folder_name
+working_path = args.working_path
 clean_startup_script = args.clean_scripts
 remove_old_files = args.update
-
-
-modify_startup = args.modify_startup
-server_uuid = args.server_uuid
-panel_url = args.panel_url
-application_api_key = args.application_api_key
-if modify_startup:
-    if not server_uuid or not panel_url or not application_api_key:
-        print("You are running pterodactyl mode with modify startup but have not provided server uuid, panel url or application api key correctly.")
-        sys.exit()
-
 
 interpreter_path = sys.executable
 if provider == "curse" or provider == "technic" or provider == "ftb" or provider == "modrinth":
@@ -92,7 +72,10 @@ print("Detected OS", operating_system)
 architecture = platform.machine()
 print("Detected Architecture", architecture)
 
-this_dir = os.path.dirname(os.path.realpath(__file__))
+if working_path:
+    this_dir = working_path
+else:
+    this_dir = os.path.dirname(os.path.realpath(__file__))
 
 
 def up_one_directory(root, parent):
@@ -240,6 +223,7 @@ if provider == "ftb":
 else:
     print("Extracting downloaded modpack archive...")
     folder_name = unzip(filename, modpack_name, file_ext, output=output)
+    print(folder_name)
 
     modpack_folder = os.listdir(join(this_dir, folder_name))
 
@@ -814,16 +798,5 @@ if mode == "pterodactyl":
                     # Requires enabling developer mode in windows 10.
                     elif operating_system == "Windows":
                         os.symlink(link_from, link_to)
-
-if modify_startup == True:
-    if minecraft_version != "unknown":
-        print("Changing startup script and java version")
-        current_server_id = get_server_id(
-            server_uuid, panel_url, application_api_key)
-        update_startup(current_server_id, minecraft_version,
-                       panel_url, application_api_key)
-    else:
-        print("Minecraft version is", minecraft_version,
-              "cannot update Pterodactyl startup with this version.")
 
 print("Finished downloading and installing modpack", modpack_name + "! :)")
