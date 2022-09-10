@@ -37,6 +37,7 @@ parser.add_argument("--clean-scripts", default=False, action="store_true")
 parser.add_argument("--update", default=False, action="store_true")
 # Set predefined name of output folder (does not work with pterodactly mode)
 parser.add_argument("--folder-name", default=False, type=str, action="store")
+# Set working path where modpack should download and install
 parser.add_argument("--working-path", default=False, type=str, action="store")
 
 args = parser.parse_args()
@@ -537,7 +538,7 @@ else:
                             move(filename, new_filename)
                             filename = new_filename
                         temp_folder = unzip(
-                            filename, "manifest_check", file_ext)
+                            filename, "manifest_check", file_ext, this_dir)
                         for name in glob.glob(glob.escape(this_dir + "/" + temp_folder + "/") + "manifest.json"):
                             if name:
                                 print(
