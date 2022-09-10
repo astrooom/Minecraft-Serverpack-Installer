@@ -241,9 +241,6 @@ else:
     print("Extracting downloaded modpack archive...")
     folder_name = unzip(filename, modpack_name, file_ext)
 
-    if output:
-        folder_name = output
-
     modpack_folder = os.listdir(join(this_dir, folder_name))
 
     # Count number of files
