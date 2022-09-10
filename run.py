@@ -219,8 +219,8 @@ if provider == "ftb":
         folder_name = output
     else:
         folder_name = modpack_name
-    move(filename, this_dir + "/" + modpack_name + "/" + filename)
-    os.chdir(f"{this_dir}/{modpack_name}")
+    move(filename, this_dir + "/" + folder_name + "/" + filename)
+    os.chdir(f"{this_dir}/{folder_name}")
 
     if operating_system == "Linux":
         os.system(f"chmod +x {filename}")
