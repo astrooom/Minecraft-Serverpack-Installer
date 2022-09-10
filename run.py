@@ -223,7 +223,7 @@ if provider == "ftb":
 # Unzip downloaded modpack zip
 else:
     print("Extracting downloaded modpack archive...")
-    folder_name = unzip(filename, modpack_name, file_ext, output=output)
+    folder_name = unzip(filename, modpack_name, file_ext, this_dir, output=output)
     print(folder_name)
 
     modpack_folder = os.listdir(join(this_dir, folder_name))
