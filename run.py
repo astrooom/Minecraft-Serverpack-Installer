@@ -616,7 +616,6 @@ else:
                                 except:
                                     pass
 
-
 # Garbage files cleanup
 print("Running garbage cleanup...")
 for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "*installer.jar"):
@@ -671,12 +670,19 @@ if clean_startup_script:
 #     if name:
 #         print("Removing", name)
 #         os.remove(name)
-
+has_forge_jar = False
 for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "forge*.jar"):
     if name:
         print("Renaming", name, "to server.jar")
         os.chdir(f"{this_dir}/{folder_name}")
         os.rename(name, "server.jar")
+        has_forge_jar = True
+if not has_forge_jar:
+    for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "*.jar"):
+        if 'minecraft' not in name and 'fabric' not in name:
+            print("Renaming", name, "to server.jar")
+            os.chdir(f"{this_dir}/{folder_name}")
+            os.rename(name, "server.jar")
 
 has_properties = False
 for name in glob.glob(glob.escape(this_dir + "/" + folder_name + "/") + "server.properties"):
